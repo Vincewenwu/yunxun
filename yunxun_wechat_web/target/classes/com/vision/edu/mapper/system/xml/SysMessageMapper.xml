@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysMessageMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysMessage">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="sendee_id" property="sendeeId" />
+		<result column="source_type" property="sourceType" />
+		<result column="source_id" property="sourceId" />
+		<result column="message_title" property="messageTitle" />
+		<result column="message_content" property="messageContent" />
+		<result column="url" property="url" />
+		<result column="read_flag" property="readFlag" />
+		<result column="read_time" property="readTime" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据宝贝id查询宝贝消息 -->
+	<select id="findPersonalDetails" resultType="com.vision.edu.dto.MyMessageDto">
+		SELECT
+			sys_message.id AS messageId,
+			sys_message.school_id AS schoolId,
+			sys_message.send_id AS sendId,
+			sys_message.sendee_id AS sendeeId,
+			sys_message.source_type AS sourceType,
+			sys_message.source_id AS sourceId,
+			sys_message.message_title AS messageTitle,
+			sys_message.message_content AS messageContent,
+			sys_message.url AS messageUrl,
+			sys_message.read_flag AS readFlag,
+			sys_message.read_time AS readTime,
+			sys_message.create_man AS createMan,
+			sys_message.create_time AS createTime,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName
+		FROM
+			sys_message
+		INNER JOIN sys_user ON sys_user.id = sys_message.send_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		WHERE
+			sys_message.sendee_id = #{sendeeId}
+		AND sys_message.delete_flag = #{deleteFlag}
+	</select>
+	
+	<!-- 根据消息id查询消息详情 -->
+	<select id="findMessageForDetails" resultType="com.vision.edu.dto.MyMessageDto">
+		SELECT
+			sys_message.id AS messageId,
+			sys_message.school_id AS schoolId,
+			sys_message.send_id AS sendId,
+			sys_message.sendee_id AS sendeeId,
+			sys_message.source_type AS sourceType,
+			sys_message.source_id AS sourceId,
+			sys_message.message_title AS messageTitle,
+			sys_message.message_content AS messageContent,
+			sys_message.url AS messageUrl,
+			sys_message.read_flag AS readFlag,
+			sys_message.read_time AS readTime,
+			sys_message.create_man AS createMan,
+			sys_message.create_time AS createTime,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName
+		FROM
+			sys_message
+		INNER JOIN sys_user ON sys_user.id = sys_message.send_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		WHERE
+			sys_message.id = #{messageId}
+	</select>
+	
+	<!-- 老师通讯录 -->
+	<select id="findAddressBook" resultType="com.vision.edu.dto.TheTeacherAddressBookDao">
+		SELECT
+			sys_user.id AS sysUserId,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName,
+			mem_class_teacher.class_id AS classId
+		FROM
+			mem_class_teacher
+		INNER JOIN sys_user ON sys_user.id = mem_class_teacher.member_id
+		INNER JOIN base_baby ON mem_class_teacher.class_id = base_baby.class_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		WHERE
+			base_baby.id = #{babyId}
+	</select>
+	
+	<!-- 根据教师id查询教师消息 -->
+	<select id="findtheTeacherAMessage" resultType="com.vision.edu.dto.MyMessageDto">
+		SELECT
+			sys_message.id AS messageId,
+			sys_message.school_id AS schoolId,
+			sys_message.send_id AS sendId,
+			sys_message.sendee_id AS sendeeId,
+			sys_message.source_type AS sourceType,
+			sys_message.source_id AS sourceId,
+			sys_message.message_title AS messageTitle,
+			sys_message.message_content AS messageContent,
+			sys_message.url AS messageUrl,
+			sys_message.read_flag AS readFlag,
+			sys_message.read_time AS readTime,
+			sys_message.create_man AS createMan,
+			sys_message.create_time AS createTime,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName
+		FROM
+			sys_message
+		INNER JOIN sys_user ON sys_user.id = sys_message.send_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		WHERE
+			sys_message.send_id = #{sendId}
+		AND sys_message.delete_flag = #{deleteFlag}
+	</select>
+	
+	<!-- 查看没有阅读消息条数 -->
+	<select id="findDidnReadTheMessage" resultType="com.vision.edu.entity.system.SysMessage">
+		SELECT
+			sys_message.id AS messageId,
+			sys_message.school_id AS schoolId,
+			sys_message.send_id AS sendId,
+			sys_message.sendee_id AS sendeeId,
+			sys_message.source_id
+		FROM
+			sys_message
+		WHERE
+			sys_message.send_id = #{sendId}
+		AND sys_message.read_flag = #{readFlag}
+		AND sys_message.delete_flag = #{deleteFlag}
+	</select>
+	
+</mapper>

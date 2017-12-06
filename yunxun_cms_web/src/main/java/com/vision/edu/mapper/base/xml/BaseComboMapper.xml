@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseComboMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseCombo">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="price" property="price" />
+		<result column="shool_id" property="shoolID" />
+		<result column="when_long" property="whenLong" />
+		<result column="discount" property="discount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="shool_id" property="shoolID" />
+	</resultMap>
+
+<!--chenwenwu 查宝贝信息加分页-->
+<select id="findBaseCombopage" resultType="com.vision.edu.entity.base.BaseCombo">
+SELECT
+	base_combo.id,
+	base_combo.shool_id as shoolID,
+	base_combo.`name`,
+	base_combo.price,
+	base_combo.when_long as whenLong,
+	base_combo.discount,
+	base_combo.create_time as createTime ,
+	base_combo.create_mam as createMam,
+	base_combo.update_time as updateTime,
+	base_combo.update_man as updateMan,
+	base_combo.delete_flag as deleteFlag,
+	base_combo.start_time as startTime,
+	base_combo.end_time as endTime
+FROM
+	base_combo
+where 
+    base_combo.`name` LIKE concat('%',#{baseCombo.name},'%') and 
+	base_combo.shool_id LIKE concat('%',#{baseCombo.shoolID},'%')   
+</select>
+
+
+
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysRecipeBankMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysRecipeBank">
+		<id column="id" property="id" />
+		<result column="serial_num" property="serialNum" />
+		<result column="name" property="name" />
+		<result column="cover_images" property="coverImages" />
+		<result column="picture_set" property="pictureSet" />
+		<result column="intro" property="intro" />
+		<result column="food_material" property="foodMaterial" />
+		<result column="nutrient" property="nutrient" />
+		<result column="school_id" property="schoolId" />
+		<result column="used_count" property="usedCount" />
+		<result column="browse_count" property="browseCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="show_flag" property="showFlag" />
+	</resultMap>
+
+</mapper>

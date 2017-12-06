@@ -1,0 +1,17 @@
+#FTP
+ftp.host=112.74.67.41
+ftp.port=21
+ftp.user.name=xuechenftpimg
+ftp.user.password=123456
+ftp.baseDir=
+image_service=http://img.xuechenedu.com/
+
+#
+activemq.brokerURL=failover:(tcp://127.0.0.1:61616)
+activemq.user_name=
+activemq.password=
+activemq.maxConnections=100
+activemq.ActiveMQTopic=subject
+activemq.ActiveMQQueue=MqQueue
+activemq.pubSubDomain=false
+activemq.sessionCacheSize=100

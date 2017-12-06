@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemBabyTeamMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemBabyTeam">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="school_id" property="schoolId" />
+		<result column="class_id" property="classId" />
+		<result column="team" property="team" />
+		<result column="year" property="year" />
+		<result column="create_time" property="createTime" />
+		<result column="create_man" property="createMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	<!-- 查找家长信息-->
+	<select id="findTreamByBabyId" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		id ,
+		baby_id AS babyId,
+		year,
+		CASE	
+		WHEN team = 0 THEN  CONCAT(year,'上学期')      
+		ELSE  CONCAT(year,'下学期')
+		END team 
+	FROM
+		mem_baby_team
+	 where delete_flag = 0 and baby_id=#{babyId} 
+</select>
+</mapper>

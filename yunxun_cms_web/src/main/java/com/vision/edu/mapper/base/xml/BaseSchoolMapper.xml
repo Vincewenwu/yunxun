@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSchoolMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSchool">
+		<id column="id" property="id" />
+		<result column="father_id" property="fatherId" />
+		<result column="name" property="name" />
+		<result column="address" property="address" />
+		<result column="telephone" property="telephone" />
+		<result column="coordinate" property="coordinate" />
+		<result column="email" property="email" />
+		<result column="logo" property="logo" />
+		<result column="province_id" property="provinceId" />
+		<result column="city_id" property="cityId" />
+		<result column="county_id" property="countyId" />
+		<result column="state" property="state" />
+		<result column="effective_time" property="effectiveTime" />
+		<result column="warning_days" property="warningDays" />
+		<result column="intro" property="intro" />
+		<result column="website" property="website" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="am_check_in_deadline" property="amCheckInDeadline" />
+		<result column="pm_check_in_deadline" property="pmCheckInDeadline" />
+		<result column="am_check_out_deadline" property="amCheckOutDeadline" />
+		<result column="pm_check_out_deadline" property="pmCheckOutDeadline" />
+		<result column="recipe_publish_time" property="recipePublishTime" />
+	</resultMap>
+<!-- jiangwangying -->
+    <select id="findSchoolByDynamic"  resultType="com.vision.edu.dto.SchoolDTO">
+SELECT GROUP_CONCAT(base_member.`name`) AS yzName,
+	base_school.id,
+	base_school.father_id AS fatherId,
+	base_school.code,
+	base_school.`name`,
+	base_school.address,
+	base_school.telephone,
+	base_school.coordinate,
+	base_school.email,
+	base_school.logo,
+	base_school.province_id AS provinceId,
+	base_school.city_id AS cityId,
+	base_school.county_id AS countyId,
+	base_school.state,
+	base_school.effective_time AS effectiveTime,
+	base_school.warning_days AS warningDays,
+	base_school.intro,
+	base_school.website,
+	base_school.create_time AS createTime,
+	base_school.create_mam AS createMam,
+	base_school.update_time AS updateTime,
+	base_school.update_man AS updateMan,
+	base_school.delete_flag AS deleteFlag,
+	base_member.`name` AS yzName,
+	sys_user.binding_code AS bingdingCode
+FROM
+	base_school
+INNER JOIN base_member ON base_school.id = base_member.school_id
+INNER JOIN sys_user ON sys_user.base_member_id = base_member.id
+WHERE  (1=1) AND sys_user.memberType = 3
+	<if test="null!=schoolId and schoolId!='' ">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=schoolName and schoolName!='' ">
+	AND base_school.`name` LIKE concat('%',#{schoolName},'%')
+	</if>
+	<choose>
+            <when test="deleteFlag == 0 or deleteFlag == 1">
+                AND base_school.delete_flag = #{deleteFlag}
+            </when>
+            <otherwise>
+              
+            </otherwise>
+        </choose>
+        GROUP BY base_school.id
+    </select>
+    
+    <!-- jiangwangying -->
+    <select id="findSchools"  resultMap="BaseResultMap">
+	SELECT
+		base_school.id,
+		base_school.`name`,
+		base_school.address,
+		base_school.telephone,
+		base_school.email,
+		base_school.logo,
+		base_school.website,
+		base_school.create_time,
+		base_school.intro,
+		base_school.state
+	FROM
+		base_school
+	WHERE
+	    base_school.`name`  LIKE concat('%',#{name},'%')  
+    </select>
+</mapper>

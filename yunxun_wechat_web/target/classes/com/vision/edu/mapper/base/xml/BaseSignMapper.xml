@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSignMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSign">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="record_type" property="recordType" />
+		<result column="sing_state" property="singState" />
+		<result column="sign_time" property="signTime" />
+		<result column="voice_url" property="voiceUrl" />
+		<result column="temperature" property="temperature" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="time_frame" property="timeFrame" />
+	</resultMap>
+
+</mapper>

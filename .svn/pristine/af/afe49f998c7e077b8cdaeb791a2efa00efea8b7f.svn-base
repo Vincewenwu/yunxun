@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseClassMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseClass">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="teacher_id" property="teacherId" />
+		<result column="class_name" property="className" />
+		<result column="people_num" property="peopleNum" />
+		<result column="description" property="description" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+    <!--动态查询班级 jiangwangying -->
+    <select id="findClassByDynamic" resultType="com.vision.edu.dto.ClassDTO">
+	SELECT
+		base_class.id,
+		base_class.people_num AS peopleNum,
+		base_class.class_name AS className,
+		base_class.description,
+		base_class.create_time AS createTime,
+		base_class.delete_flag AS deleteFlag,
+		base_school.`name` AS schoolName,
+		base_member.`name` AS teacherName,
+		base_grade.grade_name AS gradeName
+	FROM
+		base_class
+	INNER JOIN base_school ON base_class.school_id = base_school.id
+	LEFT  JOIN sys_user ON base_class.teacher_id = sys_user.id
+	LEFT JOIN base_member ON sys_user.base_member_id = base_member.id
+	INNER JOIN base_grade ON base_class.grade_id = base_grade.id
+	WHERE
+	(1 = 1)
+	<if test="null!=schoolId and schoolId!=''">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=gradeId and gradeId!=''">
+	AND base_grade.id = #{gradeId}
+	</if>
+	<if test="null!=vague and vague!=''">
+	AND base_class.class_name LIKE CONCAT('%',#{vague},'%')
+	OR  base_school.`name` LIKE CONCAT('%',#{vague},'%')
+	OR  base_grade.grade_name LIKE CONCAT('%',#{vague},'%')
+	OR  base_member.`name` LIKE CONCAT('%',#{vague},'%')
+	</if>
+</select>
+</mapper>

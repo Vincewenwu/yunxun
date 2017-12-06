@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemSchoolRecipeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemSchoolRecipe">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="name" property="name" />
+		<result column="browse_count" property="browseCount" />
+		<result column="publish_id" property="publishId" />
+		<result column="publish_time" property="publishTime" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+</mapper>

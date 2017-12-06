@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemBabySurrogateMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemBabySurrogate">
+		<result column="surrogate_id" property="surrogateId" />
+		<result column="parent_baby_id" property="parentBabyId" />
+		<result column="relationship" property="relationship" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+<!--chenwenwu 新增接送人表-->
+<update id="editOneBabySurrogate" >
+UPDATE mem_baby_surrogate
+SET 
+ parent_baby_id = concat(#{memBabySurrogate.parentBabyId}),
+ relationship = concat(#{memBabySurrogate.relationship}),
+ create_time =concat(#{memBabySurrogate.createTime}),
+ create_mam = concat(#{memBabySurrogate.createMam}),
+ update_time = concat(#{memBabySurrogate.updateTime}),
+ update_man = concat(#{memBabySurrogate.updateMan}),
+ delete_flag =concat(#{memBabySurrogate.deleteFlag})
+ where surrogate_id=concat(#{memBabySurrogate.surrogateId})
+</update>
+
+<!--chenwenwu 修改接送人表-->
+<update id="delOneBabySurrogate" >
+UPDATE mem_baby_surrogate
+SET 
+ delete_flag =#{deleteFlag}
+ where surrogate_id=#{surrogateId}
+</update>
+
+<select id="findOneBabybaseSurrogate" resultType="com.vision.edu.dto.OneBabybaseSurrogateDTO" >
+SELECT
+	base_surrogate.headurl,
+	base_surrogate.`name`,
+	base_surrogate.phone,
+	base_surrogate.telphone,
+	base_surrogate.idcard,
+	base_surrogate.address,
+	base_surrogate.delete_flag AS deleteFlag,
+	base_surrogate.id,
+	mem_baby_surrogate.parent_baby_id,
+	mem_baby_surrogate.relationship
+FROM
+	base_surrogate
+INNER JOIN mem_baby_surrogate ON mem_baby_surrogate.surrogate_id = base_surrogate.id
+WHERE
+	mem_baby_surrogate.parent_baby_id =#{babyid} and
+	  base_surrogate.id LIKE concat('%',#{baseSurrogateid},'%')  
+	</select>
+	<select id="findBabySurrogateByBabyId" resultMap="BaseResultMap">
+		SELECT
+		    base_surrogate.id,
+		    base_surrogate.`name`,
+		    base_surrogate.headurl,
+		    base_surrogate.phone,
+		    base_surrogate.telphone,
+		    base_surrogate.idcard,
+		    base_surrogate.address,
+		    base_surrogate.create_time,
+		    base_surrogate.create_mam,
+		    base_surrogate.update_time,
+		    base_surrogate.update_man,
+		    base_surrogate.delete_flag
+		FROM
+		    mem_baby_surrogate
+		INNER JOIN mem_parent_baby ON mem_baby_surrogate.parent_baby_id = mem_parent_baby.id
+		INNER JOIN base_surrogate ON mem_baby_surrogate.surrogate_id = base_surrogate.id
+		WHERE
+		    mem_parent_baby.baby_id = #{baseBaby.id}
+	</select>
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemBabyEvalMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemBabyEval">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="eval_item_id" property="evalItemId" />
+		<result column="eval_content_id" property="evalContentId" />
+		<result column="eval_standard_id" property="evalStandardId" />
+		<result column="score" property="score" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- @author WuYing 查询教师对宝贝评测信息 -->
+	<select id="findEvaluatingInformation" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		mem_baby_eval.id,
+		base_school.`name` AS schoolName,
+		base_grade.grade_name AS gradeName,
+		base_class.class_name AS className,
+		mem_baby_eval.baby_id,
+		mem_baby_eval.baby_team_id AS babyTeamId,
+		base_baby.`name` AS babyName,
+		IF (mem_baby_team.team = 0,	CONCAT(mem_baby_team. YEAR,'上学期'),CONCAT(mem_baby_team. YEAR,'下学期')) AS team,
+		sum(mem_baby_eval.score) AS score
+	FROM
+		mem_baby_eval
+		INNER JOIN mem_baby_team ON mem_baby_team.id = mem_baby_eval.baby_team_id
+		INNER JOIN base_class ON base_class.id = mem_baby_team.class_id
+		INNER JOIN base_grade ON base_grade.id = base_class.grade_id
+		INNER JOIN base_school ON base_school.id = mem_baby_team.school_id
+		INNER JOIN base_baby ON mem_baby_eval.baby_id = base_baby.id
+	WHERE
+		mem_baby_eval.delete_flag = 0
+		<if test="map.babyName1 != null and map.babyName1 != '' ">
+			AND base_baby.`name` = #{map.babyName1}
+		</if>
+		<if test="map.babyTeamId !=null and map.babyTeamId !='' ">
+			AND mem_baby_eval.baby_team_id = #{map.babyTeamId }
+		</if>
+		GROUP BY mem_baby_team.id
+		ORDER BY team DESC
+	</select>
+	<!-- @author WuYing 根据宝贝学期ID查询教师对宝贝评测信息  -->
+	<select id="findEvaluatingById" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		mem_baby_eval.id,
+		base_school.`name` AS schoolName,
+		base_grade.grade_name AS gradeName,
+		base_grade.id AS gradeId,
+		base_class.class_name AS className,
+		mem_baby_eval.baby_id,
+		mem_baby_eval.baby_team_id AS babyTeamId,
+		base_baby.`name` AS babyName,
+		base_eval_project.project_name AS projectName,
+		base_eval_content.content_name AS contentName,
+		base_eval_content.standrad_name AS standradName,
+		base_eval_content.scoring_range AS scoringRange,
+		concat('',mem_baby_eval.score) AS scoring,
+	IF (mem_baby_team.team = 0,	CONCAT(mem_baby_team. YEAR,'上学期'),CONCAT(mem_baby_team. YEAR,'下学期')) AS team
+	FROM
+		mem_baby_eval
+		INNER JOIN mem_baby_team ON mem_baby_team.id = mem_baby_eval.baby_team_id
+		INNER JOIN base_class ON base_class.id = mem_baby_team.class_id
+		INNER JOIN base_grade ON base_grade.id = base_class.grade_id
+		INNER JOIN base_school ON base_school.id = mem_baby_team.school_id
+		INNER JOIN base_baby ON mem_baby_eval.baby_id = base_baby.id
+		INNER JOIN base_eval_project ON base_eval_project.id = mem_baby_eval.eval_item_id
+		INNER JOIN base_eval_content ON base_eval_content.id = mem_baby_eval.eval_content_id
+	WHERE
+	mem_baby_eval.delete_flag = 0 AND  mem_baby_eval.baby_team_id = #{babyTeamId}
+	</select>
+	<!-- @author WuYing 根据宝贝学期ID查询家长对宝贝评测信息  -->
+	<select id="findPanrentEvaluatingByBabyTeamId" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		mem_child_home_eval.id,
+		base_school.`name` AS schoolName,
+		base_grade.grade_name AS gradeName,
+		base_class.class_name AS className,
+		mem_child_home_eval.baby_id,
+		mem_child_home_eval.baby_team_id AS babyTeamId,
+		base_baby.`name` AS babyName,
+		base_grade.id AS gradeId,
+		mem_parent_comments.day_home AS dayHome,
+		mem_parent_comments.best_way AS bestWay,
+		mem_parent_comments.best_progress AS bestProgress,
+		 mem_parent_comments.behave AS behave,
+		IF (
+			mem_baby_team.team = 0,
+			CONCAT(
+				mem_baby_team. YEAR,
+				'上学期'
+			),
+			CONCAT(
+				mem_baby_team. YEAR,
+				'下学期'
+			)
+		) AS team,
+		 sum(
+			mem_child_home_eval.star_num
+		) AS starNum
+	FROM
+		mem_child_home_eval
+		INNER JOIN mem_baby_team ON mem_baby_team.id = mem_child_home_eval.baby_team_id
+		INNER JOIN base_class ON base_class.id = mem_baby_team.class_id
+		INNER JOIN base_grade ON base_grade.id = base_class.grade_id
+		INNER JOIN base_school ON base_school.id = mem_baby_team.school_id
+		INNER JOIN base_baby ON mem_child_home_eval.baby_id = base_baby.id
+		LEFT JOIN mem_parent_comments on mem_parent_comments.baby_team_id = mem_baby_team.id
+	WHERE
+		mem_child_home_eval.delete_flag = 0
+		AND mem_baby_team.id=#{babyTeamId}
+	</select>
+	<!-- 根据宝贝学期ID修改教师对宝贝评价  wuying-->
+	<!-- <update id="updateMemBabyDeleteFlag" parameterType="java.lang.String">
+		update mem_baby_eval set delete_flag=1,update_man='wuying', update_time=now()
+		WHERE baby_team_id = #{babyTeamId}
+	</update> -->
+	
+
+</mapper>

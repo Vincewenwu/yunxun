@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemMessageMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemMessage">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="content" property="content" />
+		<result column="member_id" property="memberId" />
+		<result column="cover_id" property="coverId" />
+		<result column="message_type" property="messageType" />
+		<result column="url" property="url" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="confirm_flag" property="confirmFlag" />
+	</resultMap>
+
+</mapper>

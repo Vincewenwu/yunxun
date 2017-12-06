@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSchoolInfoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSchoolInfo">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="info_type" property="infoType" />
+		<result column="serial_num" property="serialNum" />
+		<result column="intro" property="intro" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="cover_images" property="coverImages" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="link" property="link" />
+		<result column="browse_count" property="browseCount" />
+		<result column="comment_count" property="commentCount" />
+		<result column="apply_count" property="applyCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="collection_count" property="collectionCount" />
+		<result column="range_type" property="rangeType" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="check_time" property="checkTime" />
+		<result column="check_man" property="checkMan" />
+		<result column="check_flag" property="checkFlag" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="content_imgs" property="contentImgs" />
+	</resultMap>
+	
+	<!-- 查询图片墙的所有的信息 -->
+	<select id="findPhotoAll" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			schoinfo.id,
+			schoinfo.schoolId,
+			schoinfo.infoType,
+			schoinfo.coverImages,
+			schoinfo.rangeType,
+			schoinfo.delete_flag,
+			schoinfo.serial_num,
+			schoinfo.create_time
+	FROM
+		(
+		SELECT
+			base_school_info.id,
+			base_school_info.school_id AS schoolId,
+			base_school_info.info_type AS infoType,
+			base_school_info.cover_images AS coverImages,
+			base_school_info.range_type AS rangeType,
+			base_school_info.delete_flag,
+			base_school_info.serial_num,
+			base_school_info.create_time
+		FROM
+			base_school_info
+		WHERE
+			base_school_info.range_type = #{map.qpt}
+		AND base_school_info.info_type =#{map.bn}
+			UNION
+				SELECT
+					base_school_info.id,
+					base_school_info.school_id AS schoolId,
+					base_school_info.info_type AS infoType,
+					base_school_info.cover_images AS coverImages,
+					base_school_info.range_type AS rangeType,
+					base_school_info.delete_flag,
+					base_school_info.serial_num,
+					base_school_info.create_time
+				FROM
+					base_school_info
+				WHERE
+					base_school_info.range_type = #{map.qyx}
+				AND base_school_info.info_type = #{map.bn}
+				<if test="map.schid !=null and map.schid!=''">
+					AND base_school_info.school_id =#{map.schoolId}
+				</if>
+					UNION
+						SELECT
+							base_school_info.id,
+							base_school_info.school_id AS schoolId,
+							base_school_info.info_type AS infoType,
+							base_school_info.cover_images AS coverImages,
+							base_school_info.range_type AS rangeType,
+							base_school_info.delete_flag,
+							base_school_info.serial_num,
+							base_school_info.create_time
+						FROM
+							base_school_info
+						INNER JOIN mem_info_group ON base_school_info.id = mem_info_group.school_info_id
+						INNER JOIN mem_member_group ON mem_member_group.group_id = mem_info_group.base_group_id
+						WHERE
+							base_school_info.range_type = #{map.fzts}
+						AND base_school_info.info_type =#{map.bn}
+						<if test="map.schid!=null and map.schid!=''">
+							AND base_school_info.school_id =#{map.schid}
+						</if>
+						<if test="map.babyId!=null and map.babyId!=''">
+							AND mem_member_group.baby_id = #{map.babyId}
+						</if>
+						) schoinfo
+			WHERE
+				schoinfo.delete_flag = 0
+			ORDER BY
+				schoinfo.serial_num,
+				schoinfo.create_time DESC	
+	</select>
+
+	
+	<!-- 查看图片的详细信息 -->
+	<select id="findPhotoAllDetail" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		base_school_info.id AS id,
+		base_school_info.title,
+		base_school_info.content,
+		base_school_info.cover_images AS coverImages,
+		base_school_info.link,
+		base_school_info.create_mam AS createMam,
+		base_school_info.start_time as startTime
+	FROM
+		base_school_info
+		where base_school_info.id=#{id}
+	</select>
+	
+	
+	<!-- 查询公告标题的最新信息 -->
+	<select id="findAdvertisTitle" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			schoinfo.id,
+			schoinfo.title,
+			schoinfo.create_time,
+			schoinfo.cover_images
+		FROM
+			(
+				SELECT
+					base_school_info.id,
+					base_school_info.title,
+					base_school_info.create_time,
+					base_school_info.cover_images,
+					base_school_info.delete_flag,
+					base_school_info.serial_num
+				FROM
+					base_school_info
+				WHERE
+			base_school_info.range_type = #{map.qpt}
+		AND base_school_info.info_type =#{map.gg}
+				UNION
+					SELECT
+						base_school_info.id,
+						base_school_info.title,
+						base_school_info.create_time,
+						base_school_info.cover_images,
+						base_school_info.delete_flag,
+						base_school_info.serial_num
+					FROM
+						base_school_info
+					WHERE
+						base_school_info.range_type = #{map.qyx}
+					AND base_school_info.info_type = #{map.gg}
+				<if test="map.schid !=null and map.schid!=''">
+					AND base_school_info.school_id =#{map.schoolId}
+				</if>
+					UNION
+						SELECT
+							base_school_info.id,
+							base_school_info.title,
+							base_school_info.create_time,
+							base_school_info.cover_images,
+							base_school_info.delete_flag,
+							base_school_info.serial_num
+						FROM
+							base_school_info
+						INNER JOIN mem_info_group ON base_school_info.id = mem_info_group.school_info_id
+						INNER JOIN mem_member_group ON mem_member_group.group_id = mem_info_group.base_group_id
+						WHERE
+							base_school_info.range_type = #{map.fzts}
+						AND base_school_info.info_type = #{map.gg}
+						<if test="map.schid!=null and map.schid!=''">
+							AND base_school_info.school_id =#{map.schid}
+						</if>
+						<if test="map.babyId!=null and map.babyId!=''">
+							AND mem_member_group.baby_id = #{map.babyId}
+						</if>
+			) schoinfo
+		WHERE
+			schoinfo.delete_flag = 0
+		ORDER BY
+			schoinfo.serial_num,
+			schoinfo.create_time DESC
+		LIMIT 1
+	</select>
+	
+	<!-- 查询公告标题的详情信息 -->
+	<select id="findAdvertisDetail" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_school_info.title,
+			base_school_info.content,
+			base_school_info.create_time,
+			base_school_info.cover_images,
+			base_school_info.id
+		FROM
+			base_school_info
+		WHERE base_school_info.id=#{strCode}
+	</select>
+	
+	<!-- 查看资讯活动基本最新信息 -->
+	<select id="findInforMation" resultType="com.vision.edu.common.base.BaseEntity">
+			SELECT
+				info.*
+			FROM
+				(
+					SELECT
+						schoinfo.*
+					FROM
+						(
+							SELECT
+					base_school_info.id,
+					base_school_info.info_type AS infoType,
+					base_school_info.serial_num,
+					base_school_info.title,
+					base_school_info.cover_images,
+					base_school_info.browse_count,
+					base_school_info.point_count,
+					base_school_info.collection_count,
+					base_school_info.create_time,
+					base_school_info.comment_count,
+					base_school_info.apply_count,
+					base_school_info.delete_flag
+				FROM
+					base_school_info
+				WHERE
+					base_school_info.range_type = #{map.qpt}
+				AND base_school_info.info_type IN (
+					#{map.zx},#{map.hd})
+					UNION
+						SELECT
+							base_school_info.id,
+							base_school_info.info_type AS infoType,
+							base_school_info.serial_num,
+							base_school_info.title,
+							base_school_info.cover_images,
+							base_school_info.browse_count,
+							base_school_info.point_count,
+							base_school_info.collection_count,
+							base_school_info.create_time,
+							base_school_info.comment_count,
+							base_school_info.apply_count,
+							base_school_info.delete_flag
+						FROM
+							base_school_info
+						WHERE
+							base_school_info.range_type = #{map.qyx}
+						AND base_school_info.info_type IN (
+							#{map.zx}, #{map.hd})
+							AND base_school_info.school_id = #{map.schoolId}
+							UNION
+								SELECT
+									base_school_info.id,
+									base_school_info.info_type AS infoType,
+									base_school_info.serial_num,
+									base_school_info.title,
+									base_school_info.cover_images,
+									base_school_info.browse_count,
+									base_school_info.point_count,
+									base_school_info.collection_count,
+									base_school_info.create_time,
+									base_school_info.comment_count,
+									base_school_info.apply_count,
+									base_school_info.delete_flag
+								FROM
+									base_school_info
+								INNER JOIN mem_info_group ON base_school_info.id = mem_info_group.school_info_id
+								INNER JOIN mem_member_group ON mem_member_group.group_id = mem_info_group.base_group_id
+								WHERE
+									base_school_info.range_type = #{map.fzts}
+								AND base_school_info.info_type IN (
+									#{map.zx}, #{map.hd})
+									AND base_school_info.school_id = #{map.schoolId}
+									AND mem_member_group.baby_id = #{map.babyId}
+								) schoinfo
+								WHERE
+									schoinfo.delete_flag = 0
+								ORDER BY
+									schoinfo.serial_num,
+									schoinfo.create_time DESC
+						) info
+						GROUP BY
+							info.infoType
+	</select>
+	
+	<!-- 查看资讯活动基本最新信息的更多消息 -->
+	<select id="findInforMationMore" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+				info.*
+			FROM
+				(
+					SELECT
+						schoinfo.*
+					FROM
+						(
+							SELECT
+					base_school_info.id,
+					base_school_info.info_type AS infoType,
+					base_school_info.serial_num,
+					base_school_info.title,
+					base_school_info.cover_images,
+					base_school_info.browse_count,
+					base_school_info.point_count,
+					base_school_info.collection_count,
+					base_school_info.create_time,
+					base_school_info.comment_count,
+					base_school_info.apply_count,
+					base_school_info.delete_flag
+				FROM
+					base_school_info
+				WHERE
+					base_school_info.range_type = #{map.qpt}
+				AND base_school_info.info_type IN (
+					#{map.zx},#{map.hd})
+					UNION
+						SELECT
+							base_school_info.id,
+							base_school_info.info_type AS infoType,
+							base_school_info.serial_num,
+							base_school_info.title,
+							base_school_info.cover_images,
+							base_school_info.browse_count,
+							base_school_info.point_count,
+							base_school_info.collection_count,
+							base_school_info.create_time,
+							base_school_info.comment_count,
+							base_school_info.apply_count,
+							base_school_info.delete_flag
+						FROM
+							base_school_info
+						WHERE
+							base_school_info.range_type = #{map.qyx}
+						AND base_school_info.info_type IN (
+							#{map.zx}, #{map.hd})
+							AND base_school_info.school_id = #{map.schoolId}
+							UNION
+								SELECT
+									base_school_info.id,
+									base_school_info.info_type AS infoType,
+									base_school_info.serial_num,
+									base_school_info.title,
+									base_school_info.cover_images,
+									base_school_info.browse_count,
+									base_school_info.point_count,
+									base_school_info.collection_count,
+									base_school_info.create_time,
+									base_school_info.comment_count,
+									base_school_info.apply_count,
+									base_school_info.delete_flag
+								FROM
+									base_school_info
+								INNER JOIN mem_info_group ON base_school_info.id = mem_info_group.school_info_id
+								INNER JOIN mem_member_group ON mem_member_group.group_id = mem_info_group.base_group_id
+								WHERE
+									base_school_info.range_type = #{map.fzts}
+								AND base_school_info.info_type IN (
+									#{map.zx}, #{map.hd})
+									AND base_school_info.school_id = #{map.schoolId}
+									AND mem_member_group.baby_id = #{map.babyId}
+								) schoinfo
+								WHERE
+									schoinfo.delete_flag = 0
+								ORDER BY
+									schoinfo.serial_num,
+									schoinfo.create_time DESC
+						) info
+	</select>
+	
+	<!-- 根据ID查看资讯详细信息-->
+	<select id="findInforMationDetail" resultType="com.vision.edu.entity.base.BaseSchoolInfo">
+		SELECT
+			base_school_info.title,
+			base_school_info.create_time,
+			base_school_info.cover_images as coverImages,
+			base_school_info.content,
+			base_school_info.point_count as pointCount,
+			base_school_info.browse_count as browseCount,
+			base_school_info.start_time,
+			base_school_info.id,
+			base_school_info.create_mam as createMam,
+			mem_praise.id AS praiseId,
+			IFNULL(mem_praise.cancel_no,1) AS cancelNo
+			FROM
+            base_school_info
+            LEFT JOIN mem_praise ON base_school_info.id = mem_praise.source_id AND mem_praise.delete_flag=0 AND mem_praise.member_id = #{memberId}
+		WHERE
+		     base_school_info.id=#{strCode}
+	</select>
+	
+	<!-- 开始查询咨询的评论信息-->
+	<select id="findInforMationDetailNext" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_school_info.id AS infoId,
+			mem_comment.source_id,
+			mem_comment.id AS commentId,
+			mem_praise.source_id praiseSourseId,
+			base_member.`name`,
+			base_member.id AS memberId,
+			base_member.head_portrait,
+			mem_comment.`comment`,
+			mem_comment.create_time,
+			(
+				SELECT
+					COUNT(mem_praise.id)
+				FROM
+					mem_praise
+				WHERE
+					mem_praise.source_id = mem_comment.id
+			) AS praiseCount
+		FROM
+			base_school_info
+		INNER JOIN mem_comment ON base_school_info.id = mem_comment.source_id
+		INNER JOIN mem_praise ON mem_comment.id = mem_praise.source_id
+		INNER JOIN base_member ON base_member.id = mem_comment.member_id
+		WHERE
+			base_school_info.id =#{id}
+	</select>
+	
+	<!-- 查询最新的主题活动信息 -->
+	<select id="findAllThemeAct" resultType="com.vision.edu.entity.base.BaseSchoolInfo">
+		SELECT
+			base_school_info.info_type,
+			base_school_info.intro,
+			base_school_info.cover_images,
+			base_school_info.point_count,
+			mem_comment.source_id,
+			base_school_info.create_time as createTime,
+			base_school_info.title
+		FROM
+			base_school_info
+		INNER JOIN mem_comment ON mem_comment.source_id = base_school_info.id
+		WHERE
+			base_school_info.id =#{id}
+		AND base_school_info.info_type =#{infoType}
+		ORDER BY
+			base_school_info.`create_time` DESC
+		LIMIT 0,
+		 1
+	</select>
+	
+	<!-- 根据id查看主题活动的详情信息 -->
+	<select id="findAllThemeActDetailById" resultType="com.vision.edu.entity.base.BaseSchoolInfo">
+		SELECT
+			base_school_info.cover_images as coverImages,
+			base_school_info.create_time as createTime,
+			base_school_info.title,
+			base_school_info.content,
+			base_school_info.browse_count AS browseCount,
+			base_school_info.point_count AS pointCount,
+			base_school_info.collection_count,
+			base_school_info.apply_count as applyCount
+		FROM
+			base_school_info
+		WHERE
+			base_school_info.id =#{id}
+	</select>
+	
+	
+	
+	<!-- 查询新闻的所有信息 -->
+	<select id="findAllNews" resultType="com.vision.edu.entity.base.BaseSchoolInfo">
+		SELECT
+			base_school_info.cover_images,
+			base_school_info.link,
+			base_school_info.serial_num,
+			base_school_info.intro,
+			base_school_info.title,
+			base_school_info.content,
+			base_school_info.info_type,
+			base_school.`name`,
+			base_school_info.start_time,
+			base_school_info.end_time,
+			base_school_info.browse_count,
+			base_school_info.point_count,
+			base_school_info.collection_count,
+			base_school_info.whole_school_no,
+			base_school_info.create_time as createTime,
+			base_school_info.create_mam,
+			base_school_info.update_time,
+			base_school_info.update_man as updateMan,
+			base_school_info.check_time,
+			base_school_info.check_man ,
+			base_school_info.check_flag,
+			base_school_info.delete_flag
+		FROM
+			base_school_info
+		INNER JOIN base_school ON base_school.id = base_school_info.school_id
+		ORDER BY base_school_info.create_time desc
+	</select>
+	
+
+</mapper>

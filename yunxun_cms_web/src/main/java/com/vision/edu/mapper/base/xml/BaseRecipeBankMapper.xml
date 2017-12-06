@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseRecipeBankMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseRecipeBank">
+		<id column="id" property="id" />
+		<result column="sys_recipe_bank_id" property="sysRecipeBankId" />
+		<result column="school_id" property="schoolId" />
+		<result column="serial_num" property="serialNum" />
+		<result column="name" property="name" />
+		<result column="cover_images" property="coverImages" />
+		<result column="picture_set" property="pictureSet" />
+		<result column="intro" property="intro" />
+		<result column="food_material" property="foodMaterial" />
+		<result column="nutrient" property="nutrient" />
+		<result column="browse_count" property="browseCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="used_count" property="usedCount" />
+		<result column="create_mam" property="createMam" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="cite_flag" property="citeFlag" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+<!-- chenwnwu-->
+<select id="findBaseRecipeBank" resultType="com.vision.edu.entity.base.BaseRecipeBank">
+SELECT
+base_recipe_bank.id,
+base_recipe_bank.sys_recipe_bank_id as sysRecipeBankId,
+base_recipe_bank.school_id as schoolId,
+base_recipe_bank.serial_num as serialNum,
+base_recipe_bank.`name`,
+base_recipe_bank.cover_images as coverImages,
+base_recipe_bank.picture_set as pictureSet,
+base_recipe_bank.intro,
+base_recipe_bank.food_material as foodMaterial,
+base_recipe_bank.nutrient,
+base_recipe_bank.browse_count as browseCount,
+base_recipe_bank.point_count as pointCount,
+base_recipe_bank.used_count as usedCount,
+base_recipe_bank.create_mam as createMam,
+base_recipe_bank.create_time as createTime,
+base_recipe_bank.update_man as updateMan,
+base_recipe_bank.update_time as updateTime,
+base_recipe_bank.cite_flag as citeFlag,
+base_recipe_bank.delete_flag as deleteFlag
+ FROM
+base_recipe_bank
+where base_recipe_bank.school_id  LIKE concat('%',#{baseRecipeBank.schoolId},'%')  and
+      base_recipe_bank.`name` LIKE concat('%',#{baseRecipeBank.name},'%')
+</select>
+<!-- chenwnwu-->
+<select id="findOneBaseRecipeBank" resultType="com.vision.edu.entity.base.BaseRecipeBank">
+SELECT
+base_recipe_bank.id,
+base_recipe_bank.sys_recipe_bank_id as sysRecipeBankId,
+base_recipe_bank.school_id as schoolId,
+base_recipe_bank.serial_num as serialNum,
+base_recipe_bank.`name`,
+base_recipe_bank.cover_images as coverImages,
+base_recipe_bank.picture_set as pictureSet,
+base_recipe_bank.intro,
+base_recipe_bank.food_material as foodMaterial,
+base_recipe_bank.nutrient,
+base_recipe_bank.browse_count as browseCount,
+base_recipe_bank.point_count as pointCount,
+base_recipe_bank.used_count as usedCount,
+base_recipe_bank.create_mam as createMam,
+base_recipe_bank.create_time as createTime,
+base_recipe_bank.update_man as updateMan,
+base_recipe_bank.update_time as updateTime,
+base_recipe_bank.cite_flag as citeFlag,
+base_recipe_bank.delete_flag as deleteFlag
+ FROM
+base_recipe_bank
+where base_recipe_bank.school_id  LIKE concat('%', #{baseRecipeBank.schoolId},'%') and
+       base_recipe_bank.id=#{baseRecipeBank.id}
+</select>
+
+<!-- chenwnwu-->
+<select id="findOneSysRecipeBank" resultType="com.vision.edu.entity.system.SysRecipeBank">
+SELECT
+	sys_recipe_bank.id,
+	sys_recipe_bank.serial_num as serialNum,
+	sys_recipe_bank.`name`,
+	sys_recipe_bank.cover_images as coverImages,
+	sys_recipe_bank.picture_set as pictureSet,
+	sys_recipe_bank.intro,
+	sys_recipe_bank.food_material as foodMaterial,
+	sys_recipe_bank.nutrient,
+	sys_recipe_bank.school_id as schoolId
+FROM
+	sys_recipe_bank
+	where sys_recipe_bank.id=#{id}
+</select>
+
+<!-- chenwnwu查询菜谱编号-->
+<select id="findBaseRecipeBankSerialNum" resultType="com.vision.edu.entity.base.BaseRecipeBank">
+SELECT
+	base_recipe_bank.serial_num as serialNum,
+	base_recipe_bank.school_id as schoolId
+FROM
+	base_recipe_bank
+WHERE
+	base_recipe_bank.school_id = #{schoolId}
+ORDER BY
+	base_recipe_bank.serial_num DESC
+LIMIT 1
+</select>
+
+</mapper>

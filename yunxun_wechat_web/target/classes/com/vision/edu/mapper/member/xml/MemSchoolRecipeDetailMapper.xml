@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemSchoolRecipeDetailMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemSchoolRecipeDetail">
+		<id column="id" property="id" />
+		<result column="school_recipe_id" property="schoolRecipeId" />
+		<result column="base_recipe_bank_id" property="baseRecipeBankId" />
+		<result column="serial_num" property="serialNum" />
+		<result column="name" property="name" />
+		<result column="cover_images" property="coverImages" />
+		<result column="picture_set" property="pictureSet" />
+		<result column="intro" property="intro" />
+		<result column="food_material" property="foodMaterial" />
+		<result column="nutrient" property="nutrient" />
+		<result column="several_meals" property="severalMeals" />
+		<result column="create_mam" property="createMam" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据学校id查询该学校的食谱 -->
+	<select id="findSchoolRecipes" resultType="com.vision.edu.dto.MemSchoolRecipeDetailDto">
+		SELECT
+			mem_school_recipe_detail.id AS schoolRecipeDetailId,
+			mem_school_recipe_detail.base_recipe_bank_id AS baseRecipeBankId,
+			mem_school_recipe_detail.serial_num AS serialNum,
+			mem_school_recipe_detail.`name` AS schoolRecipeDetailName,
+			mem_school_recipe_detail.cover_images AS coverImages,
+			mem_school_recipe_detail.picture_set AS pictureSet,
+			mem_school_recipe_detail.intro,
+			mem_school_recipe_detail.food_material AS foodMaterial,
+			mem_school_recipe_detail.nutrient,
+			mem_school_recipe_detail.several_meals AS severalMeals,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName,
+			base_duties.duties_name AS dutiesName,
+			mem_school_recipe_detail.create_time AS createTime,
+			mem_school_recipe_detail.school_recipe_id AS schoolRecipeId
+		FROM
+			mem_dynamic
+		INNER JOIN mem_school_recipe_detail ON mem_school_recipe_detail.school_recipe_id = mem_dynamic.resources_id
+		INNER JOIN sys_user ON sys_user.id = mem_dynamic.create_mam_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		INNER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			mem_dynamic.school_id = #{schoolId}
+		AND mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+	
+	<!-- 和班菜谱集合 -->
+	<select id="findRecipeCollectionField" resultType="com.vision.edu.dto.MemSchoolRecipeDetailDto">
+		SELECT
+			mem_school_recipe_detail.id AS schoolRecipeDetailId,
+			mem_school_recipe_detail.base_recipe_bank_id AS baseRecipeBankId,
+			mem_school_recipe_detail.serial_num AS serialNum,
+			mem_school_recipe_detail.`name` AS schoolRecipeDetailName,
+			mem_school_recipe_detail.cover_images AS coverImages,
+			mem_school_recipe_detail.picture_set AS pictureSet,
+			mem_school_recipe_detail.intro,
+			mem_school_recipe_detail.food_material AS foodMaterial,
+			mem_school_recipe_detail.nutrient,
+			mem_school_recipe_detail.several_meals AS severalMeals,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName,
+			base_duties.duties_name AS dutiesName,
+			mem_school_recipe_detail.create_time AS createTime,
+			mem_school_recipe_detail.school_recipe_id AS schoolRecipeId
+		FROM
+			mem_dynamic
+		INNER JOIN mem_school_recipe_detail ON mem_school_recipe_detail.school_recipe_id = mem_dynamic.resources_id
+		INNER JOIN sys_user ON sys_user.id = mem_dynamic.create_mam_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		INNER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.resources_id = #{resourcesId}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+</mapper>

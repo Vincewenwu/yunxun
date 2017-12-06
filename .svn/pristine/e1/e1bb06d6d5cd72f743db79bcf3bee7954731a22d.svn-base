@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSignMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSign">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="record_type" property="recordType" />
+		<result column="sing_state" property="singState" />
+		<result column="sign_time" property="signTime" />
+		<result column="voice_url" property="voiceUrl" />
+		<result column="temperature" property="temperature" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="time_frame" property="timeFrame" />
+	</resultMap>
+	<!-- jiangwangying -->
+    <select id="findSign" resultType="com.vision.edu.dto.SignDTO">	
+	SELECT
+		base_sign.id,
+		base_sign.record_type AS recordType,
+		base_sign.sing_state AS signStatus,
+		base_sign.sign_time AS signTime,
+		base_sign.delete_flag AS deleteFlag,
+		base_baby.`name` AS babyName,
+		base_baby.head_portrait AS headPortrait,
+		base_grade.grade_name AS gradeName,
+		base_school.`name` AS schoolName,
+		base_class.class_name AS className
+	FROM
+		base_sign
+	LEFT JOIN base_baby ON base_sign.baby_id = base_baby.id
+	INNER JOIN base_class ON base_baby.class_id = base_class.id
+	INNER JOIN base_grade ON base_class.grade_id = base_grade.id
+	INNER JOIN base_school ON base_school.id = base_baby.school_id
+	WHERE (1=1)
+	AND base_sign.delete_flag = 0
+	<if test="null != signState and signState == 0">
+	AND  (base_sign.sing_state is NULL OR base_sign.sing_state=0)
+	</if>
+	<if test="null != signState and signState > 0">
+	AND  base_sign.sing_state = #{signState}
+	</if>
+    <if test="null!=schoolId and schoolId!=''">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=classId and classId!=''">
+	AND base_class.id = #{classId}
+	</if>
+	<if test="null!=vague and vague!=''">
+	AND (base_baby.`name` LIKE concat(concat('%',#{vague}),'%')
+	OR base_school.`name` LIKE concat(concat('%',#{vague}),'%')
+	OR base_grade.grade_name LIKE concat(concat('%',#{vague}),'%')
+	OR base_class.class_name LIKE concat(concat('%',#{vague}),'%'))
+	</if>
+	</select>
+	<select id="findNoSignBaby" resultType="com.vision.edu.dto.SignDTO">
+	SELECT
+		base_baby.`name` AS babyName,
+		base_baby.head_portrait AS headPortrait,
+		base_baby.id AS babyId
+	FROM
+		base_baby
+	INNER JOIN base_sign ON base_sign.baby_id = base_baby.id
+	WHERE
+	      base_baby.state = 0
+      AND base_baby.delete_flag = 0
+      AND base_baby.class_id  != '' 
+	  AND base_sign.delete_flag = 0
+	  AND base_sign.delete_flag = 0
+	  AND (base_sign.sing_state is NULL OR  base_sign.sing_state = 0)
+	    <if test="null != schoolId and schoolId !=''">
+	    AND base_baby.school_id = #{schoolId}
+	    </if>
+	    <if test="null != classId and classId !=''">
+	    AND base_baby.class_id = #{classId}
+	    </if>   
+	</select>
+<select id="kaoQinTongJiBySign" resultType="com.vision.edu.dto.KaoQinTongJiDTO">
+	SELECT
+		base_baby.id AS babyId,
+		base_baby.head_portrait AS headPortrait,
+		base_baby.`name` AS babyName,
+		base_school.`name` AS schoolName,
+		base_class.class_name AS className,
+		base_grade.grade_name AS gradeName
+	FROM
+		base_sign
+	LEFT JOIN base_baby ON base_sign.baby_id = base_baby.id
+	LEFT JOIN base_class ON base_baby.class_id = base_class.id
+	LEFT JOIN base_grade ON base_class.grade_id = base_grade.id
+	LEFT JOIN base_school ON base_baby.school_id = base_school.id
+	WHERE (1=1)
+	<if test="null !=babyId and babyId!=''">
+	AND base_baby.id = #{babyId}
+	</if>
+	<if test="null !=deleteFlag">
+	AND base_sign.delete_flag = #{deleteFlag}
+	</if>
+	<if test="null !=schoolId and schoolId !=''">
+	AND base_school.id = #{schoolId}
+	</if>	
+	<if test="null !=classId and classId !=''">
+	AND base_class.id = #{classId}
+	</if>
+	</select>
+</mapper>

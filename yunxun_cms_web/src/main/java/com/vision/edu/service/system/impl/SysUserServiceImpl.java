@@ -1,0 +1,816 @@
+package com.vision.edu.service.system.impl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.vision.edu.common.base.BaseEntity;
+import com.vision.edu.dto.ClassTeacherDTO;
+import com.vision.edu.dto.SysUserDTO;
+import com.vision.edu.dto.TeacherDTO;
+import com.vision.edu.entity.base.BaseClass;
+import com.vision.edu.entity.base.BaseGroup;
+import com.vision.edu.entity.base.BaseMember;
+import com.vision.edu.entity.member.MemClassTeacher;
+import com.vision.edu.entity.member.MemMemberGroup;
+import com.vision.edu.entity.system.SysModular;
+import com.vision.edu.entity.system.SysUser;
+import com.vision.edu.entity.system.SysUserRole;
+import com.vision.edu.enums.EnumDeleteFlag;
+import com.vision.edu.enums.EnumDisableFlag;
+import com.vision.edu.enums.EnumGroupType;
+import com.vision.edu.enums.EnumMemberType;
+import com.vision.edu.framework.support.HttpCode;
+import com.vision.edu.framework.util.BindingCodeUtil;
+import com.vision.edu.framework.util.EncryptUtil;
+import com.vision.edu.framework.util.Md5Util;
+import com.vision.edu.mapper.base.BaseClassMapper;
+import com.vision.edu.mapper.base.BaseGroupMapper;
+import com.vision.edu.mapper.base.BaseMemberMapper;
+import com.vision.edu.mapper.member.MemClassTeacherMapper;
+import com.vision.edu.mapper.member.MemMemberGroupMapper;
+import com.vision.edu.mapper.system.SysUserMapper;
+import com.vision.edu.mapper.system.SysUserRoleMapper;
+import com.vision.edu.platform.common.result.JsonResult;
+import com.vision.edu.service.system.ISysUserService;
+
+/**
+ * <p>
+ * 后台用户 服务实现类
+ * </p>
+ *
+ * @author XieFan
+ * @since 2017-07-14
+ */
+@Service
+public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService {
+	
+	
+	@Autowired
+	private SysUserMapper sysUserMapper;
+	
+	@Autowired
+	private BaseMemberMapper baseMemberMapper;
+	
+	@Autowired
+	private MemMemberGroupMapper memMemberGroupMapper;
+	
+	@Autowired
+	private BaseGroupMapper baseGroupMapper;
+	
+	@Autowired
+	private BaseClassMapper baseClassMapper;
+	
+	@Autowired
+	private MemClassTeacherMapper memClassTeacherMapper;
+
+	/**
+	 * 注入sysUserRoleMapper
+	 */
+	@Autowired
+	private SysUserRoleMapper sysUserRoleMapper;
+	
+	/**
+	 * 动态模糊查询教师
+	 * @author jiangwangying
+	 * @date 2017年7月31日 上午10:33:30
+	 * @param page 分页
+	 * @param schoolId 园校id
+	 * @param vague 模糊
+	 * @param memberType 成员类型
+	 * @param sysUserId 用户id
+	 * @param groupId 组id
+	 * @return
+	 */
+	public List<TeacherDTO> findTeacherByDynamic(Pagination page,String schoolId,String vague,Integer memberType,String sysUserId,String groupId){
+		
+	 return sysUserMapper.findTeacherByDynamic(page,schoolId,vague,memberType,sysUserId,groupId);
+	
+	}
+	/**
+	 * 查询用户信息
+	 * @author XieFan
+	 * @date 2017年7月16日 上午10:32:43
+	 * @param username 用户名
+	 * @param password 密码
+	 * @return
+	 */
+	public SysUserDTO findSysUserByUserNameAndPass(String username, String password) {
+		return this.baseMapper.findSysUserByUserNameAndPass(username, password);
+	}
+	
+	/**
+	 * 新增教师
+	 * @author jiangwangying
+	 * @date 2017年7月28日 下午0:26:46
+	 * @param baseMember 用户基本信息
+	 * @param createMan 新建人
+	 * @param updateMan 修改人
+	 * @return
+	 */
+	public JsonResult addTeacher(BaseMember baseMember,String dutiesId,String signature,String createMan) {
+		
+		JsonResult jsonResult = new JsonResult();
+		SysUser sysUser = new SysUser();
+		Integer result = 0 ;
+		if(baseMember == null || StringUtils.isEmpty(createMan) || StringUtils.isEmpty(baseMember.getPhoneNum()) || StringUtils.isEmpty(baseMember.getHeadPortrait())||StringUtils.isEmpty(baseMember.getSchoolId())||StringUtils.isEmpty(baseMember.getName())){
+			jsonResult.setMsg("空值");
+			jsonResult.setSuccess(false);
+			return jsonResult;
+		}
+		baseMember.setCreateTime(new Date());
+		baseMember.setCreateMan(createMan);
+		baseMember.setUpdateTime(new Date());
+		baseMember.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+		try {
+			result += baseMemberMapper.insert(baseMember);
+		} catch (Exception e) {
+			jsonResult.setMsg("简介只限文字");
+			jsonResult.setSuccess(false);
+			return jsonResult;
+		}
+		
+		
+		sysUser.setMemberType(EnumMemberType.LS.getValue());
+		sysUser.setDutiesId(dutiesId);
+		sysUser.setBindingCode(BindingCodeUtil.huoqu6weishu());
+		sysUser.setSignature(signature);
+		sysUser.setCreateTime(new Date());
+		sysUser.setCreateMam(createMan);
+		sysUser.setUpdateTime(new Date());
+		sysUser.setAccount(baseMember.getPhoneNum());
+		sysUser.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+		sysUser.setDisableNo(EnumDisableFlag.WTY.getValue());
+		sysUser.setMemberType(EnumMemberType.LS.getValue());
+		sysUser.setBaseMemberId(baseMember.getId());
+		result += sysUserMapper.insert(sysUser);
+		
+		if (result==2) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setMsg("新增失败");
+			jsonResult.setSuccess(false);
+		}
+		return jsonResult;
+	}
+	
+	/**
+	 * 根据后台用户id查询教师
+	 * @author jiangwangying
+	 * @date 2017年7月21日 上午9:17:12
+	 * @param teacherId 后台用户id
+	 * @param memberType 用户类型
+	 * @return
+	 */
+	public TeacherDTO findTeacherById(String teacherId,Integer memberType){
+		return sysUserMapper.findTeacherById(teacherId,memberType);
+	}
+
+	/**
+	 * 编辑教师
+	 * @author jiangwangying
+	 * @date 2017年7月21日 上午11:21:38
+	 * @param baseMember 用户基本信息
+	 * @param sysUserId 后台用户id
+	 * @param dutiesId 职务id
+	 * @param signature 签名
+	 * @param updateMan 修改人
+	 * @return
+	 */
+	public JsonResult editTeacher(BaseMember baseMember,String sysUserId, String dutiesId, String signature, String updateMan) {
+        JsonResult jsonResult = new JsonResult();
+		Integer result = 0;
+		
+		if(baseMember == null ||  StringUtils.isEmpty(sysUserId) || StringUtils.isEmpty(updateMan)){
+			jsonResult.setSuccess(false);
+			return jsonResult;
+		}
+		
+		SysUser sysUser = new SysUser();
+		sysUser.setId(sysUserId);
+		if (null!=dutiesId) {
+			sysUser.setDutiesId(dutiesId);
+		}
+		sysUser.setSignature(signature);
+		sysUser.setUpdateMan(updateMan);
+		sysUser.setUpdateTime(new Date());
+		result += sysUserMapper.updateById(sysUser);
+		
+		sysUser = sysUserMapper.selectById(sysUserId);
+		baseMember.setSchoolId(null);//预留 设置为null 与原来的相同  
+		baseMember.setId(sysUser.getBaseMemberId());
+		baseMember.setUpdateMan(updateMan);
+		baseMember.setUpdateTime(new Date());
+		result += baseMemberMapper.updateById(baseMember);
+		
+	    if (result == 2) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setSuccess(false);
+		}
+	    return jsonResult;
+	}
+	
+	/**
+	 * 停用教师账号
+	 * @author jiangwangying
+	 * @date 2017年7月21日 上午11:55:57
+	 * @param sysUserIds 后台用户id集合
+	 * @return
+	 */
+	public JsonResult stopSysUser(String sysUserIds, String updateMan){
+		
+		JsonResult jsonResult = new JsonResult();
+		if (StringUtils.isEmpty(sysUserIds)) {
+			 jsonResult.setSuccess(false);
+			 return jsonResult;
+		}
+		String[] ids = sysUserIds.split(",");
+		Integer idsLength = ids.length;
+		SysUser sysUser = null;
+		Integer result = 0;
+		
+		for (int i = 0; i < idsLength; i++) {
+			sysUser = new SysUser();
+			sysUser.setId(ids[i]);
+			sysUser.setDisableNo(EnumDisableFlag.YTY.getValue());
+			sysUser.setUpdateMan(updateMan);
+			sysUser.setUpdateTime(new Date());
+			result += sysUserMapper.updateById(sysUser);
+		}
+		
+		if (result==idsLength) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setSuccess(false);
+		}
+		return jsonResult;
+	}
+	
+	/**
+  	 * 将老师添加到分组/更改老师分组
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 下午4:16:22
+  	 * @param sysUserIds 后台用户id集合
+  	 * @param groupId 分组id
+  	 * @return
+  	 */
+	public JsonResult addToOrEditTeacherGroup(String sysUserIds, String groupId){
+		JsonResult jsonResult = new JsonResult();
+		if (StringUtils.isEmpty(sysUserIds) || StringUtils.isEmpty(groupId)) {
+			 jsonResult.setSuccess(false);
+			 jsonResult.setMsg("空值");
+			 return jsonResult;
+		}
+		String[] ids = sysUserIds.split(",");
+		Integer idsLength = ids.length;
+		MemMemberGroup memMemberGroup = null;
+		Integer result = 0;
+		
+		for (int i = 0; i < idsLength; i++) {
+			Map<String, Object> columnMap = new HashMap<String,Object>();
+			columnMap.put("baby_id",ids[i]);
+			columnMap.put("group_id",groupId);
+			List<MemMemberGroup> list = memMemberGroupMapper.selectByMap(columnMap);
+			memMemberGroup = new MemMemberGroup();
+			if (list.size()>0) {
+                //已在该分组
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("已在该分组");
+				return jsonResult;
+				
+			}else{
+				//新增
+				memMemberGroup.setBabyId(ids[i]);
+				memMemberGroup.setGroupId(groupId);
+				memMemberGroup.setCreateMam("jwy");
+				memMemberGroup.setCreateTime(new Date());
+				memMemberGroup.setUpdateMan("jwy");
+				memMemberGroup.setUpdateTime(new Date());
+				memMemberGroup.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+				result = memMemberGroupMapper.insert(memMemberGroup);
+			}
+		}
+		if (result > 0) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setSuccess(false);
+		}
+		return jsonResult;
+	}
+	
+	/**
+	 * 新增分组
+	 * @author jiangwangying
+	 * @date 2017年7月31日 下午2:46:39
+	 * @param groupName 组名
+	 * @param groupExplain 说明
+	 * @param createMan 创建人
+	 * @param schoolId 园id
+	 * @return
+	 */
+	public JsonResult addGroup(String groupName, String groupExplain,String createMan, String schoolId){
+		JsonResult jsonResult = new JsonResult();
+		Integer result = 0;
+		
+		BaseGroup baseGroup = new BaseGroup();
+		baseGroup.setCreateMam(createMan);
+		baseGroup.setCreateTime(new Date());
+		baseGroup.setName(groupName);
+		baseGroup.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+		baseGroup.setGroupType(EnumGroupType.JS.getValue());
+		baseGroup.setGroupExplain(groupExplain);
+		baseGroup.setSchoolId(schoolId);
+		result += baseGroupMapper.insert(baseGroup);
+		if (result > 0) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setMsg("新建失败");
+			jsonResult.setSuccess(false);
+		}
+		return jsonResult;
+	}
+	
+	/**
+	 * 根据园校id查询教师
+	 * @author jiangwangying
+	 * @date 2017年7月25日 上午11:45:50
+	 * @param schoolId 园校id
+	 * @param memberType 用户类型
+	 * @param classId  班级id
+	 * @return
+	 */
+	public List<TeacherDTO> findTeacherBySchoolId(String schoolId,Integer memberType,String classId){
+		
+		return sysUserMapper.findTeacherBySchoolId(schoolId,memberType,classId);
+	}
+	
+	/**
+	 * 查询用户角色
+	 * @author XieFan
+	 * @date 2017年7月23日 上午10:44:34
+	 * @param page 分页器
+	 * @param schoolId 园校ID
+	 * @param nameNum 姓名/账号
+	 * @return
+	 */
+	@Override
+	public Page<BaseEntity> findUserRoleBySchoolId(Page<BaseEntity> page,
+			String schoolId, String nameNum) {
+		page.setRecords(super.baseMapper.findUserRoleBySchoolId(page, schoolId, nameNum));
+		return page;
+	}
+
+	/**
+	 * 查询园校信息
+	 * @author XieFan
+	 * @date 2017年7月23日 下午5:14:44
+	 * @param schoolId 园校ID
+	 * @return
+	 */
+	@Override
+	public List<BaseEntity> findAllSchoolName(String schoolId) {
+		return super.baseMapper.findAllSchoolName(schoolId);
+	}
+
+	/**
+	 * 查询角色
+	 * @author XieFan
+	 * @date 2017年7月24日 上午11:59:56
+	 * @param schoolId 园校ID
+	 * @return
+	 */
+	@Override
+	public List<BaseEntity> findRoleNames(String schoolId) {
+		return super.baseMapper.findRoleNames(schoolId);
+	}
+
+	/**
+	 * 新增编辑用户
+	 * @author XieFan
+	 * @date 2017年7月24日 下午4:31:06
+	 * @param sysUser 用户实体
+	 * @param map 其他新增信息（用户姓名，用户手机号码，校园ID，角色ID）
+	 * @return
+	 */
+	@Override
+	public JsonResult addEditUser(SysUser sysUser, Map<String, String> map) {
+		JsonResult jsonResult = new JsonResult();
+		if (StringUtils.isEmpty(sysUser.getId())) {
+			//根据手机号码查询用户基本信息
+			BaseMember testBaseMember = this.sysUserRoleMapper.findBaseMemberByPhoneNum(map.get("userPhoneNum"));
+			if(testBaseMember != null){
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("该手机号码已绑定其他账号");
+				jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+				return jsonResult;
+			}
+			//根据账号查询用户信息
+			SysUser testSysUser = this.sysUserRoleMapper.findUserByAccount(sysUser.getAccount());
+			if(testSysUser != null){
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("账号已存在");
+				jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+				return jsonResult;
+			}
+			//新增用户基本信息
+			BaseMember baseMember = new BaseMember();
+			baseMember.setSchoolId(map.get("schoolId"));
+			baseMember.setPhoneNum(map.get("userPhoneNum"));
+			baseMember.setName(map.get("userName"));
+			baseMember.setHeadPortrait(map.get("headImg"));
+			baseMember.setCreateTime(new Date());
+			baseMember.setCreateMan("xiefan");
+			baseMember.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+			boolean baseMemberB = baseMember.insert();
+			if(!baseMemberB){
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("新增用户基本信息失败");
+				jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+				return jsonResult;
+			}else{
+				sysUser.setBindingCode(BindingCodeUtil.huoqu6weishu());
+				sysUser.setBaseMemberId(baseMember.getId());
+				sysUser.setDefaultRoleId(map.get("roleId"));
+				sysUser.setDisableNo(EnumDisableFlag.WTY.getValue());
+				sysUser.setPassword(Md5Util.generatePassword(sysUser.getPassword()));
+				sysUser.setCreateMam("xiefan");
+				sysUser.setCreateTime(new Date());
+				sysUser.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+				boolean sysUserB = this.insert(sysUser);
+				if(!sysUserB){
+					jsonResult.setSuccess(false);
+					jsonResult.setMsg("新增用户失败");
+					jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+					return jsonResult;
+				}else{
+					SysUserRole sysUserRole = new SysUserRole();
+					sysUserRole.setRoleId(map.get("roleId"));
+					sysUserRole.setUserId(sysUser.getId());
+					sysUserRole.setCreateMam("xiefan");
+					sysUserRole.setCreateTime(new Date());
+					sysUserRole.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+					boolean sysUserRoleB = sysUserRole.insert();
+					if(!sysUserRoleB){
+						jsonResult.setSuccess(false);
+						jsonResult.setMsg("新增用户角色失败");
+						jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+						return jsonResult;
+					}else{
+						jsonResult.setSuccess(true);
+						jsonResult.setMsg("新增用户成功");
+						jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+						return jsonResult;
+					}
+				}
+			}
+		} else {
+			SysUser updateSysUser = this.selectById(sysUser.getId());
+			if(updateSysUser != null){
+				if (updateSysUser.getPassword() != null) {
+					if (!updateSysUser.getPassword().equals(updateSysUser.getPassword())) {
+						updateSysUser.setPassword(Md5Util.generatePassword(sysUser.getPassword()));
+					}
+				} else {
+					updateSysUser.setPassword(Md5Util.generatePassword(sysUser.getPassword()));
+				}
+				updateSysUser.setBindingCode(BindingCodeUtil.huoqu6weishu());
+				updateSysUser.setDefaultRoleId(map.get("roleId"));
+				updateSysUser.setPassword(Md5Util.generatePassword(sysUser.getPassword()));
+				updateSysUser.setUpdateTime(new Date());
+				updateSysUser.setUpdateMan("xiefan");
+				boolean updateUser = this.updateById(updateSysUser);
+				if (updateUser) {
+					BaseMember baseUpdateMember = this.baseMemberMapper.selectById(sysUser.getBaseMemberId());
+					if (baseUpdateMember != null) {
+						baseUpdateMember.setSchoolId(map.get("schoolId"));
+						baseUpdateMember.setPhoneNum(map.get("userPhoneNum"));
+						baseUpdateMember.setName(map.get("userName"));
+						baseUpdateMember.setHeadPortrait(map.get("headImg"));
+						baseUpdateMember.setUpdateTime(new Date());
+						baseUpdateMember.setUpdateMan("xiefan");
+						Integer updateBaseMember = this.baseMemberMapper.updateById(baseUpdateMember);
+						if(updateBaseMember > 0){
+							EntityWrapper<SysUserRole> sysUserRolEntityWrapper = new EntityWrapper<SysUserRole>();
+							sysUserRolEntityWrapper.where(" user_id = {0} and role_id = {1}", sysUser.getId(), map.get("roleId"));
+							List<SysUserRole> sysUserRoles = this.sysUserRoleMapper.selectList(sysUserRolEntityWrapper);
+							if (!sysUserRoles.isEmpty()) {
+								SysUserRole sysUserRole = sysUserRoles.get(0);
+								sysUserRole.setRoleId(map.get("roleId"));
+								sysUserRole.setUpdateMan("xiefan");
+								sysUserRole.setUpdateTime(new Date());
+								sysUserRole.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+								Integer updateSysUserRole = this.sysUserRoleMapper.updateById(sysUserRole);
+								if (updateSysUserRole > 0) {
+									jsonResult.setSuccess(true);
+									jsonResult.setMsg("修改成功");
+									jsonResult.setStatus(HttpCode.OK.value().toString());
+									return jsonResult;
+								} else {
+									jsonResult.setSuccess(false);
+									jsonResult.setMsg("用户角色修改失败");
+									jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+									return jsonResult;
+								}
+							} else {
+								SysUserRole insertsyr = new SysUserRole();
+								insertsyr.setRoleId(map.get("roleId"));
+								insertsyr.setUserId(sysUser.getId());
+								insertsyr.setCreateTime(new Date());
+								insertsyr.setCreateMam("xiefan");
+								insertsyr.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+								Integer insertSysUserRole = this.sysUserRoleMapper.insert(insertsyr);
+								if (insertSysUserRole > 0) {
+									jsonResult.setSuccess(true);
+									jsonResult.setMsg("修改成功");
+									jsonResult.setStatus(HttpCode.OK.value().toString());
+									return jsonResult;
+								} else {
+									jsonResult.setSuccess(false);
+									jsonResult.setMsg("用户信息异常");
+									jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+									return jsonResult;
+								}
+							}
+						} else {
+							jsonResult.setSuccess(false);
+							jsonResult.setMsg("用户信息修改失败");
+							jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+							return jsonResult;
+						}
+					} else {
+						jsonResult.setSuccess(false);
+						jsonResult.setMsg("用户信息异常");
+						jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+						return jsonResult;
+					}
+				} else {
+					jsonResult.setSuccess(false);
+					jsonResult.setMsg("基本信息修改失败");
+					jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+					return jsonResult;
+				}
+			} else {
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("用户信息异常");
+				jsonResult.setStatus(HttpCode.BAD_REQUEST.value().toString());
+				return jsonResult;
+			}
+		}
+		
+	}
+
+	/**
+	 * 根据用户名查询用户信息
+	 * @author XieFan
+	 * @date 2017年7月25日 下午3:09:14
+	 * @param account 用户名
+	 * @return
+	 */
+	@Override
+	public SysUserDTO findSysUserByUserName(String usernmae) {
+		return super.baseMapper.findSysUserByUserName(usernmae);
+	}
+
+	/**
+	 * 根据用户ID查询用户角色
+	 * @author XieFan
+	 * @date 2017年7月25日 下午3:21:25
+	 * @param userId 用户ID
+	 * @return
+	 */
+	@Override
+	public List<SysUserRole> findSysUserRoleByUserId(String userId) {
+		EntityWrapper<SysUserRole> sysUserRole = new EntityWrapper<SysUserRole>();
+		sysUserRole.where("delete_flag = 0 and user_id = {0}", userId);
+		return this.sysUserRoleMapper.selectList(sysUserRole);
+	}
+
+	/**
+	 * 根据角色ID查询模块
+	 * @author XieFan
+	 * @date 2017年7月25日 下午3:21:25
+	 * @param userId 用户ID
+	 * @return
+	 */
+	@Override
+	public Set<SysModular> findModularByRoleId(String roleId) {
+		return super.baseMapper.findModularByRoleId(roleId);
+	}
+
+	/**
+	 * 查询菜单子节点
+	 * @author XieFan
+	 * @date 2017年7月27日 下午11:29:10
+	 * @param roleId
+	 * @return
+	 */
+	@Override
+	public List<BaseEntity> findRoleModulatByRoleId(String roleId) {
+		List<BaseEntity> roleModulars = super.baseMapper.findFarRoleModularByRoleId(roleId);//查询0级菜单
+		if(roleModulars != null){
+			for(BaseEntity roleModular:roleModulars){
+				List<BaseEntity> baseEntitys = super.baseMapper.findRoleModularByRoleId(roleId, String.valueOf(roleModular.get("id")));
+				if(baseEntitys != null){
+					roleModular.put("roleModular", baseEntitys);
+					for (BaseEntity baseEntity : baseEntitys) {
+						baseEntity.put("pageButton", super.baseMapper.findRoleModularByRoleId(roleId, String.valueOf(baseEntity.get("id"))));
+					}
+				}
+			}
+		}
+		return roleModulars;
+	}
+	
+	/**
+	 * 教师排班：查询班级教师
+	 * @author jiangwangying
+	 * @date 2017年8月1日 上午9:01:47
+	 * @param schoolId 园校id
+	 * @param classId 班级id
+	 * @param selType 查询类型： 全部、已分班、未分班
+	 * @param vague 关键字
+	 * @param page 分页
+	 * @param memberType 用户类型
+	 * @return
+	 */
+	public List<ClassTeacherDTO> findClassTeacher(Pagination page,String schoolId,String classId,Integer selType,String vague, Integer memberType){
+		
+		return sysUserMapper.findClassTeacher(page,schoolId, classId, selType,vague,memberType);
+		
+	}
+	
+	/**
+	 * 对选择的教师进行分班
+	 * @author jiangwangying
+	 * @date 2017年8月1日 上午10:53:37
+	 * @param fenBanClassId 分配到班级的id
+	 * @param teacherIds 教师id集合
+	 * @param sysUserDTO 用户
+	 * @return
+	 */
+	public JsonResult selTeachersToFenBan(String fenBanClassId, String teacherIds, SysUserDTO sysUserDTO){
+		
+		JsonResult jsonResult = new JsonResult();
+		jsonResult.setSuccess(false);
+		int result = 0;
+		if (StringUtils.isEmpty(fenBanClassId) || StringUtils.isEmpty(teacherIds)) {
+			jsonResult.setMsg("空值");
+			return jsonResult;
+		}
+		
+		String[] strTeacherId = teacherIds.split(",");
+		int strTeacherLength = strTeacherId.length;
+		
+		
+		//选择的教师都是一个学校的    和分到的班级所属的学校  要一样
+		
+		// 查询用户基本信息id
+		EntityWrapper<SysUser> ew = new EntityWrapper<SysUser>();
+		ew.setSqlSelect("base_member_id AS baseMemberId");
+		ew.where("id = {0}", strTeacherId[0]);//教师对应的学校都是一样的  这里选择第一个
+		List<SysUser> teacherList = sysUserMapper.selectList(ew);
+		if (teacherList.size()==0) {
+			jsonResult.setMsg("出错啦");
+			return jsonResult;
+		}
+		// 通过用户基本信息id查询园校id
+		EntityWrapper<BaseMember> ew1 = new EntityWrapper<BaseMember>();
+		ew1.setSqlSelect("school_id AS schoolId");
+		ew1.where("id = {0}", teacherList.get(0).getBaseMemberId());
+		List<BaseMember> baseMembersList = baseMemberMapper.selectList(ew1);
+		if (baseMembersList.size()==0) {
+			jsonResult.setMsg("出错啦");
+			return jsonResult;
+		}
+		// 通过园校id 和 现在选择的分班的班级id查询    班级
+		EntityWrapper<BaseClass> ew2 = new EntityWrapper<BaseClass>();
+		ew2.where("school_id = {0}", baseMembersList.get(0).getSchoolId());
+		ew2.where("id = {0}", fenBanClassId);
+		Integer  row = baseClassMapper.selectCount(ew2);
+		// 如果 教师所属的园校id 和 班级id 能查询数据 说明 班级所属的园校和教师所属的园校是一样的
+		if (row == 0) {
+			jsonResult.setMsg("所分配的教师所属的学校和班级所属的学校不一致");
+			return jsonResult;
+		}
+		
+		MemClassTeacher memClassTeacher = null;
+		EntityWrapper<MemClassTeacher> ew3 = null;
+		for (int i = 0; i < strTeacherLength; i++) {
+			ew3 = new EntityWrapper<MemClassTeacher>();
+			ew3.where("class_id = {0}", fenBanClassId);
+			ew3.where("member_id = {0}", strTeacherId[i]);
+			ew3.where("delete_flag = {0}", EnumDeleteFlag.WSC.getValue());
+			Integer count = memClassTeacherMapper.selectCount(ew3);
+			if (count > 0) {
+				jsonResult.setMsg("检测到已有在该班的老师，请选择未在该班的老师进行分班");
+				return jsonResult;
+			} 
+			memClassTeacher = new MemClassTeacher();
+			memClassTeacher.setClassId(fenBanClassId);
+			memClassTeacher.setMemberId(strTeacherId[i]);
+			memClassTeacher.setCreateMam(sysUserDTO.getUsername());
+			memClassTeacher.setCreateTime(new Date());
+			memClassTeacher.setDeleteFlag(EnumDeleteFlag.WSC.getValue());
+			result += memClassTeacherMapper.insert(memClassTeacher);
+			if (result == strTeacherLength) {
+				jsonResult.setSuccess(true);
+			} else {
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("分班失败啦");
+			}
+		}
+		return jsonResult;
+	}
+	
+	/**
+	 * 根据用户ID查询用户信息
+	 * <p>Title: findSysUserByUserId</p>
+	 * <p>Description: </p>
+	 * @param userId 用户ID
+	 * @return=
+	 */
+	@Override
+	public BaseEntity findSysUserByUserId(String userId) {
+		BaseEntity shsBaseEntity = this.sysUserRoleMapper.findSysUserByUserId(userId);
+		return this.sysUserRoleMapper.findSysUserByUserId(userId);
+	}
+	
+	/**
+	 * 从组里面移除教师
+	 * @author jiangwangying
+	 * @date 2017年8月9日 上午10:46:15
+	 * @param teacherIds
+	 * @return
+	 */
+	public JsonResult toRemoveGroupTeacher(String memberGroupIds,String updateMan){
+		String[] strIds = memberGroupIds.split(",");
+		Integer leng = strIds.length;
+	    MemMemberGroup memMemberGroup = null;
+	    JsonResult jsonResult = new JsonResult();
+	    Integer result = 0;
+		for (int i = 0; i < leng; i++) {
+			memMemberGroup = new MemMemberGroup();
+			memMemberGroup.setId(strIds[i]);
+			memMemberGroup.setUpdateMan(updateMan);
+			memMemberGroup.setUpdateTime(new Date());
+			memMemberGroup.setDeleteFlag(EnumDeleteFlag.YSC.getValue());
+			result += memMemberGroupMapper.updateAllColumnById(memMemberGroup);
+		}
+		if (result > 0) {
+			jsonResult.setSuccess(true);
+			jsonResult.setMsg("移除成功!");
+		} else {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("移除失败!");
+		}
+		return jsonResult;
+	}
+	/**
+	 * 删除教师
+	 * @author jiangwangying
+	 * @date 2017年8月9日 下午12:00:06
+	 * @param sysUserIds
+	 * @param updateMan
+	 * @return
+	 */
+	public JsonResult delSysUser(String sysUserIds, String updateMan) {
+		
+		JsonResult jsonResult = new JsonResult();
+		if (StringUtils.isEmpty(sysUserIds)) {
+			 jsonResult.setSuccess(false);
+			 return jsonResult;
+		}
+		String[] ids = sysUserIds.split(",");
+		Integer idsLength = ids.length;
+		SysUser sysUser = null;
+		Integer result = 0;
+		
+		for (int i = 0; i < idsLength; i++) {
+			sysUser = new SysUser();
+			sysUser.setId(ids[i]);
+			sysUser.setDeleteFlag(EnumDeleteFlag.YSC.getValue());
+			sysUser.setUpdateMan(updateMan);
+			sysUser.setUpdateTime(new Date());
+			result += sysUserMapper.updateById(sysUser);
+		}
+		
+		if (result==idsLength) {
+			jsonResult.setSuccess(true);
+		}else{
+			jsonResult.setSuccess(false);
+		}
+		return jsonResult;
+	}
+}

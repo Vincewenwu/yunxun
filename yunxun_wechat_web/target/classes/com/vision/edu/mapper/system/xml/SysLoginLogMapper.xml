@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysLoginLogMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysLoginLog">
+		<result column="school_id" property="schoolId" />
+		<result column="login_ip" property="loginIp" />
+		<result column="browser_kernel" property="browserKernel" />
+		<result column="login_time" property="loginTime" />
+		<result column="login_user_id" property="loginUserId" />
+		<result column="bow_out_time" property="bowOutTime" />
+		<result column="online_duration" property="onlineDuration" />
+	</resultMap>
+
+</mapper>

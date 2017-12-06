@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysUserMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysUser">
+		<id column="id" property="id" />
+		<result column="base_member_id" property="baseMemberId" />
+		<result column="account" property="account" />
+		<result column="password" property="password" />
+		<result column="last_login_time" property="lastLoginTime" />
+		<result column="default_role_id" property="defaultRoleId" />
+		<result column="disable_no" property="disableNo" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="message_switch" property="messageSwitch" />
+		<result column="duties_id" property="dutiesId" />
+		<result column="signature" property="signature" />
+		<result column="binding_code" property="bindingCode" />
+		<result column="memberType" property="memberType" />
+	</resultMap>
+	
+	<!-- 根据资源id查询发布菜谱者信息 -->
+	<select id="findDailyRecipes" resultType="com.vision.edu.dto.CookbookPublishersSetDto">
+		SELECT
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName,
+			base_duties.duties_name AS dutiesName,
+			mem_dynamic.create_mam_id AS createMamId,
+			mem_dynamic.resources_id AS resourcesId,
+			mem_dynamic.create_time AS createTime,
+			mem_dynamic.browse_count AS browseCount,
+			mem_dynamic.point_count AS pointCount
+		FROM
+			mem_dynamic
+		INNER JOIN sys_user ON sys_user.id = mem_dynamic.create_mam_id
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		INNER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			mem_dynamic.resources_id = #{resourcesId} 
+		AND mem_dynamic.resources_type = #{resourcesType}
+	</select>
+	
+	<!-- 根据教师id查询出教师信息绑定教师端我的信息 -->
+	<select id="findMainPage" resultType="com.vision.edu.dto.SysUserDto">
+		SELECT
+			sys_user.id,
+			sys_user.base_member_id AS baseMemberId,
+			base_member.school_id AS schoolId,
+			sys_user.duties_id AS dutiesId,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName,
+			base_member.phone_num AS phoneNum,
+			base_member.intro AS intro,
+			base_school.`name` AS schoolName,
+			base_duties.duties_name AS dutiesName,
+			sys_user.create_time AS createTime
+		FROM
+			base_member
+		INNER JOIN sys_user ON base_member.id = sys_user.base_member_id
+		INNER JOIN base_school ON base_school.id = base_member.school_id
+		INNER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			sys_user.id = #{sysUserId}
+		AND sys_user.delete_flag = #{deleteFlag}
+	</select>
+	
+	<!-- 根据教师id查询出园校id -->
+	<select id="findSysUserData" resultType="com.vision.edu.dto.SysUserDto">
+		SELECT
+			sys_user.id,
+			base_member.school_id AS schoolId
+		FROM
+			sys_user
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		WHERE
+			sys_user.id = #{sysUserId}
+		AND sys_user.delete_flag = #{deleteFlag}
+	</select>
+	
+	<!-- 根据园校id查询教师信息绑定通讯录 -->
+	<select id="findTeacherAddressBook" resultType="com.vision.edu.dto.SysUserDto">
+		SELECT
+			sys_user.id,
+			base_member.head_portrait AS headPortrait,
+			base_member.`name` AS memberName
+		FROM
+			base_member
+		INNER JOIN sys_user ON base_member.id = sys_user.base_member_id
+		WHERE
+			base_member.school_id = #{schoolId}
+		AND base_member.delete_flag = #{deleteFlag}
+	</select>
+
+</mapper>

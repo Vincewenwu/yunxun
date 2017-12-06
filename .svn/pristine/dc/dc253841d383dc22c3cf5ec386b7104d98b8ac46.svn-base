@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSchoolInfoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSchoolInfo">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="info_type" property="infoType" />
+		<result column="serial_num" property="serialNum" />
+		<result column="intro" property="intro" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="cover_images" property="coverImages" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="link" property="link" />
+		<result column="browse_count" property="browseCount" />
+        <result column="comment_count" property="commentCount" />
+        <result column="apply_count" property="applyCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="collection_count" property="collectionCount" />
+		<result column="range_type" property="rangeType" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="check_time" property="checkTime" />
+		<result column="check_man" property="checkMan" />
+		<result column="check_flag" property="checkFlag" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="content_imgs" property="contentImgs" />
+        <result column="platform_flag" property="platformFlag" />
+	</resultMap>
+
+
+<!--chenwenwu查询banner和咨询的-->
+<select id="findShoolInfofoPage" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO">
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type,
+	base_school_info.content_imgs
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+WHERE 
+   base_school_info.school_id LIKE concat('%',#{schoolId},'%')  and 
+    base_school.`name` LIKE concat('%',#{schoolname},'%') and
+    base_school_info.info_type LIKE concat('%',#{infotype},'%')
+</select>
+
+<!--chenwenwu查询活动的-->
+<select id="findShoolHuoDong" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO">
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type,
+	base_school_info.content_imgs
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+where 
+    base_school_info.school_id=#{baseSchoolInfoTwoDTO.schoolId} and 
+    base_school.`name` LIKE concat('%',#{baseSchoolInfoTwoDTO.shool_name},'%') and
+    base_school_info.info_type LIKE concat('%',#{baseSchoolInfoTwoDTO.infoType},'%') and
+    base_school_info.start_time LIKE concat('%',#{baseSchoolInfoTwoDTO.startTime},'%') and
+    base_school_info.end_time LIKE concat('%',#{baseSchoolInfoTwoDTO.endTime},'%')
+</select>
+
+	<!--chenwenwu-->
+<select id="findBaseSchoolInfoPage" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO">
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type,
+	base_school_info.content_imgs
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+WHERE 
+   base_school_info.school_id=#{schoolId} and
+   base_school.`name` LIKE concat('%',#{schoolname},'%')  and
+   base_school_info.info_type LIKE concat('%',#{infoType},'%')
+</select>
+
+	<!--chenwenwu-->
+<select id="findXiaoYuanZiXunPage" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO">
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type,
+	base_school_info.content_imgs
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+WHERE 
+   base_school_info.title LIKE concat('%',#{title},'%')  and
+   base_school_info.school_id=#{schoolId} and
+   base_school.`name` LIKE concat('%',#{schoolname},'%')  and
+   base_school_info.info_type LIKE concat('%',#{infoType},'%')
+</select>
+
+
+	<!--chenwenwu-->
+<select id="findBaseYuanSuoPage" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO" >
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type,
+	base_school_info.content_imgs
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+where base_school_info.start_time=#{startTime} and base_school_info.end_time=#{endTime}
+</select>
+
+	<!--chenwenwu-->
+<select id="findOneShoolInFo" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO" >
+SELECT
+	base_school_info.id,
+	base_school_info.school_id AS schoolId,
+	base_school_info.info_type AS infoType,
+	base_school_info.serial_num AS serialNum,
+	base_school_info.intro,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.start_time AS startTime,
+	base_school_info.end_time AS endTime,
+	base_school_info.link,
+	base_school_info.browse_count AS browseCount,
+	base_school_info.point_count AS pointCount,
+	base_school_info.collection_count AS collectionCount,
+	base_school_info.create_time AS createTime,
+	base_school_info.create_mam AS createMam,
+	base_school_info.update_time AS updateTime,
+	base_school_info.update_man AS updateMan,
+	base_school_info.check_time AS checkTime,
+	base_school_info.check_man AS checkMan,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school.`name` AS shool_name,
+	base_school_info.range_type AS rangeType,
+	base_school_info.content_imgs,
+	mem_info_group.base_group_id AS baseGroupId 
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+INNER JOIN mem_info_group ON base_school_info.id = mem_info_group.school_info_id
+WHERE 	base_school_info.id=#{baseSchoolInfo}
+</select>
+
+	<!--chenwenwu-->
+<select id="findOneShoolInFoONGroup" resultType="com.vision.edu.dto.BaseSchoolInfoTwoDTO" >
+SELECT
+base_school_info.id,
+base_school_info.school_id AS schoolId,
+base_school_info.info_type AS infoType,
+base_school_info.serial_num AS serialNum,
+base_school_info.intro,
+base_school_info.title,
+base_school_info.content,
+base_school_info.cover_images AS coverImages,
+base_school_info.start_time AS startTime,
+base_school_info.end_time AS endTime,
+base_school_info.link,
+base_school_info.browse_count AS browseCount,
+base_school_info.point_count AS pointCount,
+base_school_info.collection_count AS collectionCount,
+base_school_info.create_time AS createTime,
+base_school_info.create_mam AS createMam,
+base_school_info.update_time AS updateTime,
+base_school_info.update_man AS updateMan,
+base_school_info.check_time AS checkTime,
+base_school_info.check_man AS checkMan,
+base_school_info.check_flag AS checkFlag,
+base_school_info.delete_flag AS deleteFlag,
+base_school.`name` AS shool_name,
+base_school_info.range_type AS rangeType,
+base_school_info.content_imgs,
+base_school_info.platform_flag as platformFlag
+FROM
+	base_school_info
+INNER JOIN base_school ON base_school_info.school_id = base_school.id
+WHERE 	base_school_info.id=#{baseSchoolInfo}
+</select>
+<!-- jiangwangying  查询公告-->
+<select id="findAnnouncement"  resultType="com.vision.edu.dto.AnnouncementDTO">
+SELECT
+	base_school_info.id,
+	base_school_info.title,
+	base_school_info.content,
+	base_school_info.cover_images AS coverImages,
+	base_school_info.check_flag AS checkFlag,
+	base_school_info.delete_flag AS deleteFlag,
+	base_school_info.range_type AS rangeType
+FROM
+	base_school_info
+LEFT JOIN  base_school ON base_school_info.school_id = base_school.id
+WHERE (1=1)
+AND base_school_info.delete_flag = 0
+<if test="null!=infoType">
+   AND base_school_info.info_type = #{infoType}
+</if>
+<if test="null!=title and title!=''">
+   AND base_school_info.title LIKE concat(concat('%',#{title}),'%')
+</if>
+<if test="null!=schoolName and schoolName!=''">
+   AND base_school.name LIKE concat(concat('%',#{schoolName}),'%')
+</if>
+<if test="null!=schoolId and schoolId !=''">
+   AND base_school_info.school_id = #{schoolId}
+</if>
+<if test="null!=rangeType">
+   AND base_school_info.range_type = #{rangeType}
+</if>
+<if test="null!=platform">
+   AND base_school_info.platform_flag = #{platform}
+</if>
+GROUP BY base_school_info.title
+</select>
+</mapper>

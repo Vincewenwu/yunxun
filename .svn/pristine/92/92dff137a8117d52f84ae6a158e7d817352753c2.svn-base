@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemClassCircleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemClassCircle">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="class_id" property="classId" />
+		<result column="lable_id" property="lableId" />
+		<result column="imgs" property="imgs" />
+		<result column="content" property="content" />
+		<result column="comment_num" property="commentNum" />
+		<result column="point_count" property="pointCount" />
+		<result column="browse_count" property="browseCount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam_id" property="createMamId" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+<select id="findMemClassCircleDTO" resultType="com.vision.edu.dto.MemClassCircleDTO" >
+SELECT
+	baseMember.head_portrait AS memMemberHeadPortrait,
+	base_member.head_portrait AS sysUserHeadPortrait,
+	mem_class_circle.id,
+	mem_class_circle.lable_id AS lableID,
+	mem_class_circle.imgs,
+	mem_class_circle.content,
+	mem_class_circle.comment_num AS commentNum,
+	mem_class_circle.point_count AS pointCount,
+	mem_class_circle.browse_count AS browseCount,
+	mem_class_circle.create_time AS createTime,
+	mem_class_circle.delete_flag AS deleteFlag,
+	base_member.`name` AS baseName,
+	baseMember.`name` AS memName,
+	base_school.`name` AS shoolName,
+	base_class.class_name AS className,
+	mem_class_circle.school_id AS schoolID,
+	base_lable.lable_name AS lableName
+FROM
+	mem_class_circle
+LEFT OUTER JOIN mem_member ON mem_member.id = mem_class_circle.create_mam_id
+LEFT OUTER JOIN sys_user ON sys_user.id = mem_class_circle.create_mam_id
+LEFT OUTER JOIN base_member AS baseMember ON baseMember.id = mem_member.base_member_id
+LEFT OUTER JOIN base_member ON base_member.id = sys_user.base_member_id
+INNER JOIN base_class ON base_class.id = mem_class_circle.class_id
+INNER JOIN base_school ON base_school.id = mem_class_circle.school_id
+INNER JOIN base_lable ON mem_class_circle.lable_id = base_lable.id
+where 
+     mem_class_circle.school_id=#{memClassCircleDTO.schoolID} AND 
+     base_school.`name`  LIKE concat('%',#{memClassCircleDTO.shoolName},'%') 
+</select>
+
+</mapper>

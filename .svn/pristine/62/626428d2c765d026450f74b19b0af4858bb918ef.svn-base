@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseGroupMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseGroup">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="name" property="name" />
+		<result column="group_explain" property="groupExplain" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- jiangwangying 查询分组里面的园校 -->
+    <select id="findSchoolGroup"  resultType="com.vision.edu.dto.GroupSchoolDTO">
+	SELECT
+		base_school.id,
+		base_school.`name`
+	FROM
+		base_school
+	WHERE
+		(1 = 1)
+	<if test="null!=schoolId and schoolId!='' ">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null != deleteFlag">
+	 AND base_school.delete_flag = #{deleteFlag}
+	</if>
+    </select>
+    
+    <!-- jiangwangying 查询分组移除的教师所属的组 -->
+    <select id="findRemoveGroup"  resultMap="BaseResultMap">
+SELECT
+	base_group.`name`,
+	mem_member_group.id
+FROM
+	base_group
+INNER JOIN mem_member_group ON mem_member_group.group_id = base_group.id
+WHERE (1=1)
+	<if test="null!=teacherId and teacherId!='' ">
+	 AND mem_member_group.baby_id = #{teacherId}
+	</if>
+	<if test="null != deleteFlag">
+	 AND mem_member_group.delete_flag = #{deleteFlag}
+	</if>
+	AND (mem_member_group.delete_flag = 0 OR mem_member_group.delete_flag IS NULL)  
+    </select>
+</mapper>

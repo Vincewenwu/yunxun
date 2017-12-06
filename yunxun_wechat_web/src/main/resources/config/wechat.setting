@@ -1,0 +1,24 @@
+[wechat]
+#服务对接token
+token= feihong
+#开发者id，开发者密码，加密解密字符串
+appid= wxe0e3a5bcb72131b0
+appsecret= 58b01f20d28384da21d49f21d5ece37f
+encodingaeskey = QZX5TVmRsop8U6uYMbogSXn1DFhRe15vzNNXVpTWKRG
+#接入url
+url =http://o15p953280.iask.in/xuechen_mobile_web/WeiXinServlet.do
+[ehcache]
+#缓存accessToken类
+accessToken.server.class =
+#缓存jsapi_ticket中控系统
+ticket.jsapi.server.class = 
+#商户信息
+[tenant]
+# 支付请求中用于加密的密钥 paySignKey,登录商户端可以自己进行设置，32位的=1234567890abcdefghjklmnABCfangji
+paySignKey  = 
+#  商户id
+partnerId   = 
+# 商户登录平台密码，对微信支付没有什么关系
+partnerKey  = 
+#支付返回url
+notify_url  = http://lwl.ittun.com/WeChat_ssm/wxpayAction/notifyAction.do

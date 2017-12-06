@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseParentingKnowledgeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseParentingKnowledge">
+		<id column="id" property="id" />
+		<result column="publisher_id" property="publisherId" />
+		<result column="serial_num" property="serialNum" />
+		<result column="title" property="title" />
+		<result column="name" property="name" />
+		<result column="release_time" property="releaseTime" />
+		<result column="image" property="image" />
+		<result column="url" property="url" />
+		<result column="content" property="content" />
+		<result column="disable_no" property="disableNo" />
+		<result column="browse_count" property="browseCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="collection_num" property="collectionNum" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+	</resultMap>
+	
+	<!-- 查询育儿知识的基本信息的集合 -->
+	<select id="findParentingKnowledge" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_parenting_knowledge.publisher_id,
+			base_parenting_knowledge.image,
+			base_parenting_knowledge.content,
+			base_parenting_knowledge.browse_count,
+			base_parenting_knowledge.point_count,
+			(
+				SELECT
+					count(mem_comment.id)
+				FROM
+					mem_comment
+				WHERE
+					mem_comment.source_id =#{sourseId}
+			) AS commentCount,
+			base_member.school_id,
+			base_parenting_knowledge.title,
+			base_parenting_knowledge.create_time,
+			base_parenting_knowledge.id
+		FROM
+			base_parenting_knowledge
+		INNER JOIN base_member ON base_member.id = base_parenting_knowledge.publisher_id
+		WHERE
+			base_member.school_id =#{schoolId} limit 2
+	</select>
+	
+		<!-- 查询育儿知识的基本信息的集合 -->
+	<select id="findParentingKnowledgeMore" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_parenting_knowledge.publisher_id,
+			base_parenting_knowledge.image,
+			base_parenting_knowledge.content,
+			base_parenting_knowledge.browse_count,
+			base_parenting_knowledge.point_count,
+			(
+				SELECT
+					count(mem_comment.id)
+				FROM
+					mem_comment
+				WHERE
+					mem_comment.source_id =#{sourseId}
+			) AS commentCount,
+			base_member.school_id,
+			base_parenting_knowledge.title,
+			base_parenting_knowledge.create_time,
+			base_parenting_knowledge.id
+		FROM
+			base_parenting_knowledge
+		INNER JOIN base_member ON base_member.id = base_parenting_knowledge.publisher_id
+		WHERE
+			base_member.school_id =#{schoolId} limit 2 100
+	</select>
+	
+	<!-- 根据育儿知识id进行育儿知识详情查看 -->
+	<select id="findParentingKnowledgeDetailById" resultType="com.vision.edu.entity.base.BaseParentingKnowledge">
+		SELECT
+			base_parenting_knowledge.title,
+			base_parenting_knowledge.`name`,
+			base_parenting_knowledge.release_time,
+			base_parenting_knowledge.image,
+			base_parenting_knowledge.url,
+			base_parenting_knowledge.content,
+			base_parenting_knowledge.create_time,
+			base_parenting_knowledge.browse_count as browseCount,
+			base_parenting_knowledge.point_count as pointCount,
+			base_parenting_knowledge.collection_num
+		FROM
+			base_parenting_knowledge
+		WHERE
+			base_parenting_knowledge.id =#{knowId}
+	</select>
+
+    <!-- 根据育儿知识id查看相应的评论信息 -->
+	<select id="findParentingKnowledgeCommentById" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+			base_parenting_knowledge.id,
+			mem_comment.father_id,
+			mem_comment.create_time,
+			base_member.id AS userId,
+			mem_comment.id AS commentId,
+			base_member.head_portrait,
+			mem_comment.`comment`,
+			mem_comment.source_id,
+			base_member.`name`,
+			(SELECT COUNT(mem_praise.id) FROM mem_praise WHERE mem_praise.source_id = mem_comment.id) AS praiseCount
+		FROM
+			base_parenting_knowledge
+		INNER JOIN mem_comment ON base_parenting_knowledge.id = mem_comment.source_id
+		INNER JOIN base_member ON base_member.id = mem_comment.member_id
+		WHERE
+			base_parenting_knowledge.id =#{knowId}
+	</select>
+
+</mapper>

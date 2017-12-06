@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysRoleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysRole">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 
+		查询院校
+		@author XieFan
+		@date 2017-07-20
+	 -->
+	<select id="findAllSchoolName" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT base_school.id, base_school.`name` 
+		FROM base_school 
+		WHERE base_school.delete_flag = 0
+	</select>
+	
+	<!-- 
+		查询所有角色
+		@author xiefan
+		@date 2017-07-21
+	 -->
+	<select id="findAllSysRole" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			sys_role.id,
+			sys_role.`name`,
+			sys_role.description,
+			sys_role.create_time AS createTime,
+			CASE
+		WHEN sys_role.delete_flag = 0 THEN
+			'正常'
+		ELSE
+			'删除'
+		END deleteFlag
+		FROM
+			sys_role
+		WHERE
+			sys_role.delete_flag = 0
+		<if test="map.roleName != null and map.roleName != ''">
+			AND sys_role.`name` LIKE CONCAT('%', #{map.roleName}, '%')
+		</if>
+		<if test="map.schoolId != null and map.schoolId != ''">
+			AND sys_role.school_id = #{map.schoolId}
+		</if>
+	</select>
+	
+	<!-- 
+		查询园校
+		@author XieFan
+		@date 2017-07-21
+	 -->
+	<select id="findSchoolTree" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_school.id,
+			base_school.`name` AS label
+		FROM
+			sys_role
+		INNER JOIN base_school ON sys_role.school_id = base_school.id
+		WHERE
+			sys_role.delete_flag = 0
+		AND base_school.father_id = #{fatherId}
+		GROUP BY
+			base_school.id
+	</select>
+	
+	<!-- 
+		根据角色查询模块
+		@author XieFan
+		@date 2017-07-21
+	 -->
+	<select id="findSysModularByRoleId" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			sys_role_modular.modular_id AS id,id AS roleModularId
+		FROM
+			sys_role_modular
+		WHERE
+			sys_role_modular.delete_flag = 0
+		AND sys_role_modular.role_id = #{roleId}
+	</select>
+	
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemParentBabyMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemParentBaby">
+		<id column="id" property="id" />
+		<result column="member_id" property="memberId" />
+		<result column="baby_id" property="babyId" />
+		<result column="relationship" property="relationship" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+<!--chenwenwu-->
+<select id="findParentBaseMemberDTO" resultType="com.vision.edu.dto.ParentBaseMemberDTO">
+SELECT
+base_member.`name`,
+base_member.head_portrait,
+base_member.phone_num AS phoneNum,
+base_member.home_phone,
+base_member.id_card_num AS idCardNum,
+base_member.address,
+base_member.id,
+mem_parent_baby.member_id,
+mem_member.id AS memMemberID
+FROM
+	mem_parent_baby
+INNER JOIN mem_member ON mem_parent_baby.member_id = mem_member.id
+INNER JOIN base_member ON mem_member.base_member_id = base_member.id
+
+WHERE
+	mem_parent_baby.member_id =#{memberid}
+</select>
+
+</mapper>

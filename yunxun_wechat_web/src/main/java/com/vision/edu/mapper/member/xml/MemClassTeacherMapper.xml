@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemClassTeacherMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemClassTeacher">
+		<id column="id" property="id" />
+		<result column="class_id" property="classId" />
+		<result column="member_id" property="memberId" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据教师id查询班级信息 -->
+	<select id="findClassInformationQuery" resultType="com.vision.edu.dto.MemClassTeacherDto">
+		SELECT
+			mem_class_teacher.class_id AS classId,
+			base_class.class_name AS className,
+			base_class.people_num AS peopleNum,
+			base_class.school_id AS schoolId,
+			base_class.teacher_id AS teacherId,
+			base_class.grade_id AS gradeId,
+			base_class.description,
+			base_class.create_time AS createTime,
+			base_class.create_mam AS createMam,
+			mem_class_teacher.member_id AS memberId
+		FROM
+			mem_class_teacher
+		INNER JOIN base_class ON base_class.id = mem_class_teacher.class_id
+		WHERE
+			mem_class_teacher.member_id = #{memberId} 
+		AND mem_class_teacher.delete_flag = #{deleteFlag}
+	</select>
+
+</mapper>

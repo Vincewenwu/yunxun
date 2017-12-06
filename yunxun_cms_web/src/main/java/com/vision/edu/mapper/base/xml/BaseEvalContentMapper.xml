@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseEvalContentMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseEvalContent">
+		<id column="id" property="id" />
+		<result column="eval_project_id" property="evalProjectId" />
+		<result column="grade_id" property="gradeId" />
+		<result column="content_name" property="contentName" />
+		<result column="standrad_name" property="standradName" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="scoring_range" property="scoringRange" />
+	</resultMap>
+	<!-- @author WuYing 分页、根据条件查询 wuying -->
+	<select id="findAllTeacherEvalContent" resultType="com.vision.edu.entity.base.BaseEvalContent">
+		SELECT
+			base_eval_content.id,
+			base_eval_content.eval_project_id AS evalProjectId,
+			base_eval_content.grade_id AS gradeId,
+			base_eval_content.content_name AS contentName,
+			base_eval_content.standrad_name AS standradName,
+			base_eval_content.create_man AS createMan,
+			base_eval_content.create_time AS createTime,
+			base_eval_content.update_man AS updateMan,
+			base_eval_content.update_time AS updateTime,
+			base_eval_content.delete_flag AS deleteFlag,
+			base_eval_content.scoring_range AS scoringRange,
+			base_grade.grade_name AS gradeName,
+			base_eval_project.project_name AS projectName,
+		CASE
+		WHEN base_eval_content.delete_flag = 0 THEN
+			'正常'
+		ELSE
+			'删除'
+		END STATUS,
+		CASE
+		WHEN base_eval_content.team = 0 THEN
+			'上学期'
+		ELSE
+			'下学期'
+		END strteam
+		FROM
+			base_eval_content
+			INNER JOIN base_grade ON base_grade.id = base_eval_content.grade_id
+			INNER JOIN base_eval_project ON base_eval_project.id = base_eval_content.eval_project_id
+		WHERE base_eval_content.delete_flag = 0
+		<if test="baseEvalContent.evalProjectId != null and baseEvalContent.evalProjectId != '' ">
+			AND base_eval_content.eval_project_id = #{baseEvalContent.evalProjectId}
+		</if>
+		<if test="baseEvalContent.gradeId != null and baseEvalContent.gradeId != '' ">
+			AND base_eval_content.grade_id = #{baseEvalContent.gradeId}
+		</if>
+		<if test="baseEvalContent.contentName !=null and baseEvalContent.contentName!='' ">
+			AND baseEvalContent.content_name LIKE concat('%',#{baseEvalContent.contentName},'%')
+		</if>
+		<if test="baseEvalContent.team != null">
+			AND base_eval_content.team = #{baseEvalContent.team}
+		</if>
+	</select>
+	<!--@author WuYing 绑定教师评价内容信息 wuying -->
+	<select id="findTeacherEvalContentInfo" resultType="com.vision.edu.entity.base.BaseEvalContent">
+	SELECT
+			base_eval_content.id,
+			base_eval_content.eval_project_id AS evalProjectId,
+			base_eval_content.grade_id AS gradeId,
+			base_eval_content.content_name AS contentName,
+			base_eval_content.standrad_name AS standradName,
+			base_eval_content.create_man AS createMan,
+			base_eval_content.create_time AS createTime,
+			base_eval_content.update_man AS updateMan,
+			base_eval_content.update_time AS updateTime,
+			base_eval_content.delete_flag AS deleteFlag,
+			base_eval_content.scoring_range AS scoringRange,
+			'' AS scoring,
+			base_grade.grade_name AS gradeName,
+			base_eval_project.project_name AS projectName,
+		CASE
+		WHEN base_eval_content.delete_flag = 0 THEN
+			'正常'
+		ELSE
+			'删除'
+		END STATUS
+		FROM
+			base_eval_content
+			INNER JOIN base_grade ON base_grade.id = base_eval_content.grade_id
+			INNER JOIN base_eval_project ON base_eval_project.id = base_eval_content.eval_project_id
+		WHERE base_eval_content.delete_flag = 0 and base_grade.grade_name LIKE concat('%',#{gradeName},'%')
+	</select>
+
+</mapper>

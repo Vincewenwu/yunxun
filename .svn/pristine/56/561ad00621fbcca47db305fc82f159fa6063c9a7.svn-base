@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemPraiseMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemPraise">
+		<id column="id" property="id" />
+		<result column="member_id" property="memberId" />
+		<result column="create_time" property="createTime" />
+		<result column="praise_type" property="praiseType" />
+		<result column="source_id" property="sourceId" />
+		<result column="cancel_no" property="cancelNo" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据id进行查询点赞数是否唯一显示相应的状态 -->
+	<select id="findByUserId" resultMap="BaseResultMap">
+		SELECT
+			mem_praise.member_id,
+			mem_praise.praise_type,
+			mem_praise.create_time,
+			mem_praise.source_id,
+			mem_praise.cancel_no,
+			mem_praise.update_time,
+			mem_praise.update_man,
+			mem_praise.delete_flag,
+			mem_praise.id
+		FROM
+			mem_praise
+		WHERE member_id=#{id} and mem_praise.source_id=#{sourceId}
+	</select>
+	
+	<!-- 根据点赞记录id进行查询-->
+	<select id="findByPriaseId" resultMap="BaseResultMap">
+		SELECT
+			mem_praise.member_id,
+			mem_praise.praise_type,
+			mem_praise.create_time,
+			mem_praise.source_id,
+			mem_praise.cancel_no,
+			mem_praise.update_time,
+			mem_praise.update_man,
+			mem_praise.delete_flag,
+			mem_praise.id
+		FROM
+			mem_praise
+		WHERE mem_praise.id=#{id}
+	</select>
+</mapper>

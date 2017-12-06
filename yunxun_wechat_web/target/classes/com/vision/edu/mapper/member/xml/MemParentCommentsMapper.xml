@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemParentCommentsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemParentComments">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="baby_team_id" property="babyTeamId" />
+		<result column="day_home" property="dayHome" />
+		<result column="behave" property="behave" />
+		<result column="best_way" property="bestWay" />
+		<result column="best_progress" property="bestProgress" />
+		<result column="create_time" property="createTime" />
+		<result column="create_man" property="createMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+</mapper>

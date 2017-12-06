@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseMemberMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseMember">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="unionid" property="unionid" />
+		<result column="openid" property="openid" />
+		<result column="sex" property="sex" />
+		<result column="name" property="name" />
+		<result column="phone_num" property="phoneNum" />
+		<result column="address" property="address" />
+		<result column="head_portrait" property="headPortrait" />
+		<result column="home_phone" property="homePhone" />
+		<result column="intro" property="intro" />
+		<result column="email" property="email" />
+		<result column="qq" property="qq" />
+		<result column="id_card_num" property="idCardNum" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="birth" property="birth" />
+	</resultMap>
+	
+		<!-- 根据学校的id查找园长的基本信息 -->
+	<select id="findPrincipalById" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_school.`name` AS schoolName,
+			base_member.head_portrait AS headPortrait,
+			base_member.intro,
+			base_school.id AS strSchoolId,
+			base_member.`name` AS userName,
+			base_member.id,
+			sys_user.memberType
+		FROM
+			sys_user
+		INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+		INNER JOIN base_school ON base_school.id = base_member.school_id
+		WHERE
+			base_school.id =#{schoolId}
+		AND sys_user.memberType =#{memberType}
+	</select>
+	
+	<!-- 通过园长的id查询园长的详细信息 -->
+	<select id="findPrincipalDetailByUserId" resultType="com.vision.edu.dto.PrincipalMsgDTO">
+		SELECT
+			base_school.`name` AS schoolName,
+			base_member.head_portrait AS headPortrait,
+			base_member.intro,
+			base_school.id AS strSchoolId,
+			base_member.id,
+			mem_praise.id AS praiseId,
+			(
+				SELECT
+					COUNT(mem_praise.id)
+				FROM
+					mem_praise
+				WHERE
+					mem_praise.source_id =#{strCode}
+				AND mem_praise.cancel_no = 0
+			) AS pcount,
+			IFNULL(mem_praise.cancel_no, 1) AS cancelNo
+		FROM
+			base_member
+		INNER JOIN base_school ON base_school.id = base_member.school_id
+		LEFT JOIN mem_praise ON mem_praise.source_id =#{strCode} AND mem_praise.member_id =#{memberId}
+		WHERE
+			base_member.id =#{strCode}
+	</select>
+	
+	<!-- 查询一个园校所有老师的基本信息 -->
+	<select id="findListTeacher" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_member.`name`,
+			sys_user.`password`,
+			base_school.`name` AS schoolName,
+			base_duties.duties_name,
+			base_school.id,
+			base_member.id AS userId,
+			sys_user.memberType
+			FROM
+				sys_user
+			INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+			INNER JOIN base_school ON base_school.id = base_member.school_id
+			INNER JOIN base_duties ON base_school.id = base_duties.school_id
+			WHERE
+		sys_user.memberType =#{memberType}
+	    AND base_school.id =#{schoolId} limit 3
+	</select>
+	
+		<!-- 查询一个园校所有老师的基本信息 -->
+	<select id="findListTeacherMore" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_member.`name`,
+			sys_user.`password`,
+			base_school.`name` AS schoolName,
+			base_duties.duties_name,
+			base_school.id,
+			base_member.id AS userId,
+			sys_user.memberType
+			FROM
+				sys_user
+			INNER JOIN base_member ON base_member.id = sys_user.base_member_id
+			INNER JOIN base_school ON base_school.id = base_member.school_id
+			INNER JOIN base_duties ON base_school.id = base_duties.school_id
+			WHERE
+		sys_user.memberType =#{memberType}
+	    AND base_school.id =#{schoolId} LIMIT 3,100
+	</select>
+
+	<!-- 根据园丁的id查询园丁的详细信息 -->
+	<select id="findListTeacherDetailById" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			base_member.head_portrait AS headPortrait,
+			base_member.intro,
+			base_member.id,
+			mem_praise.id AS praiseId,
+			(
+				SELECT
+					COUNT(mem_praise.id)
+				FROM
+					mem_praise
+				WHERE
+					mem_praise.source_id =#{strCode}
+				AND mem_praise.cancel_no = 0
+			) AS pcount,
+			IFNULL(mem_praise.cancel_no, 1) AS cancelNo
+		FROM
+			base_member
+		LEFT JOIN mem_praise ON mem_praise.source_id =#{strCode} AND mem_praise.member_id =#{memberId}
+		WHERE
+			base_member.id =#{strCode}
+	</select>
+
+</mapper>

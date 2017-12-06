@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseParentingKnowledgeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseParentingKnowledge">
+		<id column="id" property="id" />
+		<result column="publisher_id" property="publisherId" />
+		<result column="serial_num" property="serialNum" />
+		<result column="title" property="title" />
+		<result column="name" property="name" />
+		<result column="leble_id" property="lebleId" />
+		<result column="image" property="image" />
+		<result column="url" property="url" />
+		<result column="content" property="content" />
+		<result column="disable_no" property="disableNo" />
+		<result column="browse_count" property="browseCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="comment_count" property="commentCount" />
+		<result column="collection_num" property="collectionNum" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="range_type" property="rangeType" />
+		<result column="school_id" property="schoolId" />
+        <result column="platform_flag" property="platformFlag" />
+	</resultMap>
+
+</mapper>

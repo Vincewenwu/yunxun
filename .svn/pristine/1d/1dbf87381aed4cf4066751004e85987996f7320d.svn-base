@@ -1,0 +1,503 @@
+package com.vision.edu.web.controller.system;
+
+import static org.hamcrest.CoreMatchers.nullValue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.jdbc.SQL;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import com.mysql.fabric.xmlrpc.base.Data;
+import com.vision.edu.core.base.BaseController;
+import com.vision.edu.dto.GroupSchoolDTO;
+import com.vision.edu.dto.SysUserDTO;
+import com.vision.edu.dto.TeacherDTO;
+import com.vision.edu.entity.base.BaseDuties;
+import com.vision.edu.entity.base.BaseGroup;
+import com.vision.edu.entity.base.BaseMember;
+import com.vision.edu.entity.base.BaseSchool;
+import com.vision.edu.entity.member.MemMember;
+import com.vision.edu.entity.system.SysUser;
+import com.vision.edu.enums.EnumDeleteFlag;
+import com.vision.edu.enums.EnumGroupType;
+import com.vision.edu.enums.EnumMemberType;
+import com.vision.edu.framework.util.UploadUtil;
+import com.vision.edu.mapper.member.MemMemberMapper;
+import com.vision.edu.platform.common.result.JsonResult;
+import com.vision.edu.service.base.IBaseDutiesService;
+import com.vision.edu.service.base.IBaseGroupService;
+import com.vision.edu.service.base.IBaseMemberService;
+import com.vision.edu.service.base.IBaseSchoolService;
+import com.vision.edu.service.member.IMemMemberGroupService;
+import com.vision.edu.service.member.IMemMemberService;
+import com.vision.edu.service.system.ISysUserService;
+
+
+@Controller
+@RequestMapping("/teacher")
+public class TeacherController extends BaseController {
+
+	@Autowired
+    IMemMemberService memMemberService;
+	@Autowired 
+    IBaseMemberService baseMemberService;
+	@Autowired
+    ISysUserService sysUserService;
+  	@Autowired
+    IBaseSchoolService baseSchoolService;
+  	@Autowired 
+  	IBaseGroupService baseGroupService;
+  	@Autowired
+  	IBaseDutiesService baseDutiesService;
+  	
+  	
+  	Map<String, String> uploadImg;
+	
+  	
+  	/**
+	 * 上传图片
+	 * @author jiangwangying
+	 * @date 2017年7月27日 下午3:25:55
+	 */
+	@ResponseBody
+	@RequestMapping("/uploadImg")
+	public void uploadGongGaoImg() 
+	{
+		uploadImg = new HashMap<String,String>();
+		uploadImg = UploadUtil.uploadImage(super.getRequest(), "teacher");
+	}
+  	
+	/**
+	 * 查询教师
+	 * @author jiangwangying
+	 * @date 2017年7月28日 下午11:00:44
+	 * @param startPage 起始页码
+	 * @param pageSize 每页大小
+	 * @param schoolId 学校id
+	 * @param vague 模糊搜索
+	 * @return
+	 */
+  	@ResponseBody
+	@RequestMapping("/findTeacherByDynamic")
+    public JsonResult findTeacherByDynamic(Integer startPage,Integer pageSize,String schoolId,String vague,String groupId){
+		
+		JSONObject jsonObject = new JSONObject();
+		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		Integer memberType = sysUserDTO.getMemberType();
+		if (memberType == EnumMemberType.YZ.getValue() || memberType == EnumMemberType.LS.getValue()) {
+			schoolId = sysUserDTO.getSchoolId();
+		}
+		
+		
+		memberType = EnumMemberType.LS.getValue();
+		Page<TeacherDTO> page = null;
+		Integer total = 0;
+		
+		page = new Page<TeacherDTO>(startPage, pageSize);
+		List<TeacherDTO> list = sysUserService.findTeacherByDynamic(page,schoolId,vague,memberType,null,groupId);
+		if (list.size()>0) {
+			total = page.getTotal();
+			jsonObject.put("list", list);
+			jsonObject.put("total", total);
+			jsonResult.setSuccess(true);
+	        jsonResult.setObj(jsonObject);
+		} else {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("无符合条件的数据");
+		}
+        return jsonResult;
+	}
+  	/**
+  	 * 绑定教师分组树形
+  	 * @author jiangwangying
+  	 * @date 2017年7月20日 上午9:54:28
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/findTeacherGroup")
+  	public JsonResult findTeacherGroup(){
+
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+	    Integer memberType = sysUserDTO.getMemberType();
+	    List<GroupSchoolDTO> groupSchoolList = null;//一级节点学校
+  		if (memberType == EnumMemberType.LS.getValue() ||memberType == EnumMemberType.YZ.getValue()) {
+  			groupSchoolList = baseGroupService.findSchoolGroup(sysUserDTO.getSchoolId(), null);
+		} else {
+			groupSchoolList = baseGroupService.findSchoolGroup(null, null);
+		}
+  		if (groupSchoolList.size()>0) {
+  			EntityWrapper<BaseGroup> ew1 = null;
+  			Integer len = groupSchoolList.size();
+  			for (int i = 0; i < len; i++) {
+  				ew1 = new EntityWrapper<BaseGroup>();
+  				ew1.setSqlSelect("id,name").where("school_id = {0}", groupSchoolList.get(i).getId());
+				List<BaseGroup> groupList = baseGroupService.selectList(ew1);
+			    if (groupList.size()>0) {
+			    	// 二级节点 会员组
+			    	groupSchoolList.get(i).setChildren((ArrayList<BaseGroup>) groupList);
+				}
+			}
+  			jsonResult.setObj(groupSchoolList);
+  			jsonResult.setSuccess(true);
+  			return jsonResult;
+		}
+		jsonResult.setSuccess(false);
+		return jsonResult;
+     	
+  	}
+  	
+  	/**
+  	 * 根据园校查询组
+  	 * @author jiangwangying
+  	 * @date 2017年7月20日 上午9:54:28
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/findTeacherGroupById")
+  	public JsonResult findTeacherGroupById(String schoolIds){
+
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		if (StringUtils.isEmpty(schoolIds)) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("schoolIds为空");
+			return jsonResult;
+		}
+		String[] strSchoolId = schoolIds.split(",");
+		Integer strSchoolIdLen = strSchoolId.length;
+		
+		
+	    Integer memberType = sysUserDTO.getMemberType();
+  	    if (memberType == EnumMemberType.LS.getValue() || memberType == EnumMemberType.YZ.getValue()) {
+			for (int i = 0; i < strSchoolIdLen; i++) {
+				if (!strSchoolId[i].equals(sysUserDTO.getSchoolId())) {
+					jsonResult.setSuccess(false);
+					jsonResult.setMsg("出错啦");
+					return jsonResult;
+				}
+			}
+		}
+  	    if (memberType == EnumMemberType.PTGL.getValue()) {
+  	    	for (int i = 0; i < strSchoolIdLen; i++) {
+  	    		for (int j = 0; j < strSchoolIdLen; j++) {
+				   if (!strSchoolId[i].equals(strSchoolId[j])) {
+					   jsonResult.setSuccess(false);
+						jsonResult.setMsg("只能将同一个学校的老师分配到相同学校的组里面哦");
+						return jsonResult;
+				   }
+			    }
+  	        }
+        }
+  	    
+  	    EntityWrapper<BaseGroup> ew = new EntityWrapper<BaseGroup>();
+		ew.where("school_id = {0}",strSchoolId[0]);
+		ew.where("delete_flag = {0}",EnumDeleteFlag.WSC.getValue());
+		ew.setSqlSelect("id,name");
+		List<BaseGroup> list = baseGroupService.selectList(ew);
+  	    if (list.size()>0) {
+  	    	jsonResult.setSuccess(true);
+  	  	    jsonResult.setObj(list);
+		} else {
+			jsonResult.setSuccess(false);
+		    jsonResult.setMsg("查询不到该教师对应学校的组信息,请先新增该校的组");
+		}
+  	   return jsonResult;
+  	}
+  	
+  	/**
+  	 * 绑定职务下拉框
+  	 * @author jiangwangying
+  	 * @date 2017年7月20日 上午9:54:28
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/findDuties")
+  	public JsonResult findDuties(String schoolId){
+  		
+  		JsonResult jsonResult = new JsonResult();
+  		if (StringUtils.isEmpty(schoolId)) {
+  			jsonResult.setSuccess(false);
+  			return jsonResult;
+		}
+  		EntityWrapper<BaseDuties> ew = new EntityWrapper<BaseDuties>();
+  		//ew.where("school_id = {0} and delete_flag2 = {1}",schoolId,EnumDeleteFlag.WSC.getValue());
+  		ew.where("school_id = {0}",schoolId);
+  		ew.where("delete_flag2 = {0}",EnumDeleteFlag.WSC.getValue());
+		ew.setSqlSelect("id,duties_name AS dutiesName");
+		List<BaseDuties> list = baseDutiesService.selectList(ew);
+		jsonResult.setObj(list);
+		return jsonResult;
+  		
+  	}
+  	
+	/**
+	 * 新增教师
+	 * @author jiangwangying
+	 * @date 2017年7月11日 下午9:15:18
+	 * @param baseMember
+	 * @param sysUser
+	 */
+  	@ResponseBody
+	@RequestMapping("/addTeacher")
+    public JsonResult addTeacher(BaseMember baseMember,String dutiesId,String signature ){
+  		
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		String createMan = sysUserDTO.getUsername();
+		if (null !=uploadImg) {
+			baseMember.setHeadPortrait(uploadImg.get("teacherImg"));
+		} else {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("总得给张图吧");
+			return jsonResult;
+		}
+		uploadImg = null;//避免下一次使用上次的图
+  		return sysUserService.addTeacher(baseMember,dutiesId,signature, createMan);
+	}
+  	
+  	/**
+  	 * 编辑教师
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 上午10:34:43
+  	 * @param baseMember
+  	 * @param dutiesId
+  	 * @param signature
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/editTeacher")
+    public JsonResult editTeacher(BaseMember baseMember,String sysUserId,String dutiesId,String signature ){
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		String updateMan = sysUserDTO.getUsername();
+		if (null !=uploadImg) {
+			baseMember.setHeadPortrait(uploadImg.get("teacherImg"));
+		}
+		uploadImg = null;//避免下一次使用上次的图
+  		return sysUserService.editTeacher(baseMember,sysUserId,dutiesId,signature,updateMan);
+	}
+	
+  	/**
+  	 * 根据后台用户id查询老师
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 上午9:27:09
+  	 * @param teacherId 后台用户id
+  	 * @return
+  	 */
+	@ResponseBody
+	@RequestMapping("/findTeacherById")
+	public JsonResult findTeacherById(String teacherId){
+
+		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		
+		
+		TeacherDTO teacherDTO = new TeacherDTO();
+		Integer memberType = EnumMemberType.LS.getValue();// 1教师 2园长 3平台管理员
+		teacherDTO = sysUserService.findTeacherById(teacherId,memberType);
+		jsonResult.setObj(teacherDTO);
+		return jsonResult;
+		
+	}
+	
+	/**
+	 * 停用教师账号
+	 * @author jiangwangying
+	 * @date 2017年7月21日 上午11:55:38
+	 * @param sysUserId
+	 * @return
+	 */
+  	@ResponseBody
+	@RequestMapping("/stopSysUser")
+    public JsonResult stopSysUser(String sysUserIds){
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+  		
+		return sysUserService.stopSysUser(sysUserIds,sysUserDTO.getUsername());
+	}
+  	
+  	/**
+	 * 停用教师账号
+	 * @author jiangwangying
+	 * @date 2017年7月21日 上午11:55:38
+	 * @param sysUserId
+	 * @return
+	 */
+  	@ResponseBody
+	@RequestMapping("/delSysUser")
+    public JsonResult delSysUser(String sysUserIds){
+  		
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO ||  StringUtils.isEmpty(sysUserDTO.getUsername())) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		
+		return sysUserService.delSysUser(sysUserIds,sysUserDTO.getUsername());
+	}
+  	
+  	/**
+  	 * 将老师添加到分组/更改老师分组
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 下午4:16:22
+  	 * @param sysUserIds
+  	 * @param groupId
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/addToOrEditTeacherGroup")
+    public JsonResult addToOrEditTeacherGroup(String sysUserIds,String groupId){
+		return sysUserService.addToOrEditTeacherGroup(sysUserIds,groupId);
+	}
+  	
+  	/**
+  	 * 新建分组
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 下午10:30:58
+  	 * @param groupName 组名称
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/addGroup")
+    public JsonResult addGroup(String groupName,String groupExplain,String schoolId){
+
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType() || null==sysUserDTO.getUsername()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		if (StringUtils.isEmpty(groupName) || StringUtils.isEmpty(groupExplain) || StringUtils.isEmpty(schoolId)) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("请填写完整在提交");
+			return jsonResult;
+		}
+		
+		Integer memberType = sysUserDTO.getMemberType();
+		String createMan = sysUserDTO.getUsername();
+		if (memberType == EnumMemberType.YZ.getValue() || memberType == EnumMemberType.LS.getValue() ) {
+			if (!sysUserDTO.getSchoolId().equals(schoolId)) {
+				jsonResult.setSuccess(false);
+				jsonResult.setMsg("选择的园校与当前用户所在的园校不一致");
+				return jsonResult;
+			}
+		}
+		return sysUserService.addGroup(groupName,groupExplain,createMan,schoolId);
+	}
+  	
+  	
+  	/**
+  	 * 查询根据教师id查询教师分组
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 下午10:30:58
+  	 * @param groupName 组名称
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/findRemoveGroup")
+    public JsonResult findRemoveGroup(String teacherId){
+
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType() || null==sysUserDTO.getUsername()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		if (StringUtils.isEmpty(teacherId) || teacherId.trim()=="") {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("出错了哦");
+			return jsonResult;
+		}
+		
+		List<BaseGroup> list = baseGroupService.findRemoveGroup(teacherId,EnumDeleteFlag.WSC.getValue());
+		if (list.size()>0) {
+			jsonResult.setSuccess(true);
+			jsonResult.setObj(list);
+		} else {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("该教师还没有分有组哦");
+		}
+		return jsonResult;
+	}
+  	
+  	/**
+  	 * 查询根据教师id查询教师分组
+  	 * @author jiangwangying
+  	 * @date 2017年7月21日 下午10:30:58
+  	 * @param groupName 组名称
+  	 * @return
+  	 */
+  	@ResponseBody
+	@RequestMapping("/toRemoveGroupTeacher")
+    public JsonResult toRemoveGroupTeacher(String memberGroupIds){
+  		
+  		JsonResult jsonResult = new JsonResult();
+		SysUserDTO sysUserDTO = super.getUserInfo();
+		if (null == sysUserDTO || null == sysUserDTO.getMemberType() || null==sysUserDTO.getUsername()) {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("获取用户信息失败,请重新登录");
+			return jsonResult;
+		}
+		if (StringUtils.isEmpty(memberGroupIds) || memberGroupIds.trim()=="") {
+			jsonResult.setSuccess(false);
+			jsonResult.setMsg("出错了哦");
+			return jsonResult;
+		}
+		return sysUserService.toRemoveGroupTeacher(memberGroupIds,sysUserDTO.getUsername());
+  	}
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseLableMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseLable">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="lable_name" property="lableName" />
+		<result column="leble_type" property="lebleType" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+<!--chenwenwu 查宝贝信息加分页-->
+<select id="findBaseLableShoolDTO" resultType="com.vision.edu.dto.BaseLableShoolDTO">
+SELECT
+base_lable.id,
+base_lable.lable_name AS lableName,
+base_lable.leble_type AS lebleType,
+base_lable.create_man AS createMan,
+base_lable.create_time AS createTime,
+base_lable.delete_flag AS deleteFlag,
+base_school.`name` AS shoolName,
+base_school.id AS shoolID
+FROM
+base_lable
+LEFT JOIN base_school ON base_lable.school_id = base_school.id
+where  base_school.id LIKE concat('%',#{baseLableShoolDTO.shoolID},'%') AND  
+       base_lable.lable_name LIKE concat('%',#{baseLableShoolDTO.lableName},'%') AND 
+       base_lable.leble_type LIKE concat('%',#{baseLableShoolDTO.lebleType},'%')
+</select>
+
+</mapper>

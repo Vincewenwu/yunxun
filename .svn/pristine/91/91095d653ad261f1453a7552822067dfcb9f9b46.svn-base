@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSignRecordMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSignRecord">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="punch_man_img" property="punchManImg" />
+		<result column="sign_num" property="signNum" />
+		<result column="device_num" property="deviceNum" />
+		<result column="record_type" property="recordType" />
+		<result column="sign_status" property="signStatus" />
+		<result column="surrogate_id" property="surrogateId" />
+		<result column="sign_time" property="signTime" />
+		<result column="temperature" property="temperature" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="time_frame" property="timeFrame" />
+	</resultMap>
+	
+	<!-- 根据班级id查询考勤签到记录 -->
+	<select id="findAttendanceSignIn" resultType="com.vision.edu.dto.BaseSignRecordDto">
+		SELECT
+			base_baby.head_portrait AS headPortrait,
+			base_baby.`name` AS babyName,
+			base_sign_record.record_type AS recordType,
+			base_sign_record.temperature,
+			base_sign_record.id AS signRecordId,
+			base_sign_record.baby_id AS babyId,
+			base_sign_record.punch_man_img AS punchManImg,
+			base_sign_record.sign_num AS signNum,
+			base_sign_record.sign_status AS signStatus,
+			base_sign_record.surrogate_id AS surrogateId,
+			base_sign_record.sign_time AS signTime,
+			base_sign_record.time_frame AS timeFrame
+		FROM
+			mem_dynamic
+		INNER JOIN base_sign_record ON base_sign_record.id = mem_dynamic.resources_id
+		INNER JOIN base_baby ON base_baby.id = base_sign_record.baby_id
+		WHERE
+			mem_dynamic.class_id = #{classId}
+		AND mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+	
+	<!-- 签到集合字段 -->
+	<select id="findSignInCollectionField" resultType="com.vision.edu.dto.BaseSignRecordDto">
+		SELECT
+		base_baby.head_portrait AS headPortrait,
+		base_baby.`name` AS babyName,
+		base_sign_record.record_type AS recordType,
+		base_sign_record.temperature,
+		base_sign_record.id AS signRecordId,
+		base_sign_record.baby_id AS babyId,
+		base_sign_record.punch_man_img AS punchManImg,
+		base_sign_record.sign_num AS signNum,
+		base_sign_record.sign_status AS signStatus,
+		base_sign_record.surrogate_id AS surrogateId,
+		base_sign_record.sign_time AS signTime,
+		base_sign_record.time_frame AS timeFrame,
+		base_class.class_name AS className
+		FROM
+			base_sign_record
+		INNER JOIN base_baby ON base_baby.id = base_sign_record.baby_id
+		INNER JOIN base_class ON base_class.id = base_baby.class_id
+		WHERE
+			mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.resources_id = #{resourcesId}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+	
+	<!-- 根据签到id查询出宝贝签到信息 -->
+	<select id="findAttendanceRetroactive" resultType="com.vision.edu.dto.BaseSignRecordDto">
+		SELECT
+			base_baby.head_portrait AS headPortrait,
+			base_baby.`name` AS babyName,
+			base_sign_record.record_type AS recordType,
+			base_sign_record.temperature,
+			base_sign_record.id AS signRecordId,
+			base_sign_record.baby_id AS babyId,
+			base_sign_record.punch_man_img AS punchManImg,
+			base_sign_record.sign_num AS signNum,
+			base_sign_record.device_num AS deviceNum,
+			base_sign_record.sign_status AS signStatus,
+			base_sign_record.surrogate_id AS surrogateId,
+			base_sign_record.sign_time AS signTime,
+			base_sign_record.time_frame AS timeFrame,
+			base_class.class_name AS className
+		FROM
+			base_sign_record
+		INNER JOIN base_baby ON base_baby.id = base_sign_record.baby_id
+		INNER JOIN base_class ON base_class.id = base_baby.class_id
+		WHERE
+			base_sign_record.id = #{signRecordId}
+		AND base_sign_record.delete_flag = #{deleteFlag}
+	</select>
+	
+	<!-- 根据班级id查询出宝贝的接送情况 -->
+	<select id="findTransportSituation" resultType="com.vision.edu.dto.BaseSignRecordDto">
+		SELECT
+			base_class.class_name AS className,
+			base_baby.`name` AS babyName,
+			base_baby.head_portrait AS headPortrait,
+			base_sign_record.sign_time AS signTime,
+			base_sign_record.id AS signRecordId,
+			base_sign_record.baby_id AS babyId,
+			base_sign_record.punch_man_img AS punchManImg,
+			base_sign_record.sign_num AS signNum,
+			base_sign_record.record_type AS recordType,
+			base_sign_record.sign_status AS signStatus,
+			base_sign_record.surrogate_id AS surrogateId,
+			base_baby.class_id AS classId,
+			base_baby.school_id AS schoolId,
+			base_class.people_num AS peopleNum
+		FROM
+			base_sign_record
+		INNER JOIN base_baby ON base_baby.id = base_sign_record.baby_id
+		INNER JOIN base_class ON base_class.id = base_baby.class_id
+		WHERE
+			base_baby.class_id = #{classId}
+		AND base_sign_record.record_type = #{recordType}
+		AND base_sign_record.delete_flag = #{deleteFlag}
+	</select>
+</mapper>

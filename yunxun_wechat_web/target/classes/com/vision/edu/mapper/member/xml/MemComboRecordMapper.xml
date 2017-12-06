@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemComboRecordMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemComboRecord">
+		<id column="id" property="id" />
+		<result column="order_id" property="orderId" />
+		<result column="user_id" property="userId" />
+		<result column="combo_id" property="comboId" />
+		<result column="price" property="price" />
+		<result column="pay_time" property="payTime" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="expire_time" property="expireTime" />
+		<result column="status" property="status" />
+	</resultMap>
+	
+	<!-- 根据用户id查询套餐记录 -->
+	<select id="findSetRecords" resultType="com.vision.edu.entity.member.MemComboRecord">
+		SELECT
+			mem_combo_record.id,
+			mem_combo_record.order_id AS orderId,
+			mem_combo_record.user_id AS userId,
+			mem_combo_record.combo_id AS comboId,
+			mem_combo_record.price,
+			mem_combo_record.pay_time AS payTime,
+			mem_combo_record.expire_time AS expireTime,
+			mem_combo_record.`status`
+		FROM
+			mem_combo_record
+		WHERE
+			mem_combo_record.user_id = #{userId} AND mem_combo_record.delete_flag = #{deleteFlag}
+	</select>
+
+</mapper>

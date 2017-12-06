@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysModularMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysModular">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="father_id" property="fatherId" />
+		<result column="url" property="url" />
+		<result column="create_time" property="createTime" />
+		<result column="creat_man" property="creatMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 
+		查询所有模块
+		@author XieFan
+		@date 2017-07-18
+	 -->
+	<select id="findAllSysModule" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT sys_modular.id,sys_modular.`name`,sys_modular.delete_flag AS deleteFlag,sys_modular.father_id AS fatherId,sys_modular.url,sm.`name` AS farName,
+				CASE WHEN sys_modular.muneType = 1 THEN '模块' WHEN sys_modular.muneType = 2 THEN '页面' ELSE '按钮' END moduleType,CASE WHEN sys_modular.delete_flag = 0 THEN '正常' ELSE '删除' END status
+		FROM sys_modular LEFT JOIN sys_modular sm ON sys_modular.father_id = sm.id
+		WHERE sys_modular.delete_flag = 0
+		<if test="map.moduleName != '' and map.moduleName != null">
+			AND sys_modular.`name` LIKE CONCAT('%',#{map.moduleName},'%')
+		</if>
+		<if test="map.moduleType == 1">
+			AND sys_modular.father_id = '0'
+		</if>
+		<if test="map.moduleType == 2">
+			AND sys_modular.father_id != '0'
+		</if>
+	</select>
+	
+	<!-- 
+		根据id查询模块
+		@author XieFan
+		@date 2017-07-18
+	 -->
+	<select id="findModularById" resultType="com.vision.edu.entity.system.SysModular">
+		SELECT chirldModular.id,chirldModular.`name`,chirldModular.url,chirldModular.father_id AS pageFatherId,chirldModular.muneType,pageModular.father_id AS fatherId 
+		FROM sys_modular AS chirldModular
+		LEFT JOIN sys_modular AS pageModular ON chirldModular.father_id = pageModular.id
+		WHERE chirldModular.id = #{id}
+	</select>
+
+</mapper>

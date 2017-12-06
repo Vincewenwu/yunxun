@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemLeaveRecordMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemLeaveRecord">
+		<id column="id" property="id" />
+		<result column="addresseeid" property="addresseeid" />
+		<result column="member_id" property="memberId" />
+		<result column="member_type" property="memberType" />
+		<result column="class_id" property="classId" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="day_count" property="dayCount" />
+		<result column="when_long" property="whenLong" />
+		<result column="telephone" property="telephone" />
+		<result column="reason" property="reason" />
+		<result column="state" property="state" />
+		<result column="create_time" property="createTime" />
+		<result column="remarks" property="remarks" />
+		<result column="leave_type" property="leaveType" />
+		<result column="check_time" property="checkTime" />
+		<result column="check_man" property="checkMan" />
+		<result column="check_flag" property="checkFlag" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+<!--查询宝贝请加记录 jiangwangying -->
+    <select id="findBabyLeaveRecord" resultType="com.vision.edu.dto.LeaveRecordDTO">
+	SELECT
+        mem_leave_record.id,
+		base_baby.`name`,
+		base_class.class_name AS className,
+		base_school.`name` AS schoolName,
+		mem_leave_record.start_time AS startTime,
+		mem_leave_record.end_time AS endTime,
+		mem_leave_record.create_time AS createTime,
+		mem_leave_record.when_long AS whenLong,
+		mem_leave_record.delete_flag AS deleteFlag,
+		mem_leave_record.check_flag AS checkFlag
+	FROM
+		mem_leave_record
+	INNER JOIN base_baby ON mem_leave_record.member_id = base_baby.id
+	INNER JOIN base_class ON base_baby.class_id = base_class.id
+	INNER JOIN base_school ON base_class.school_id = base_school.id
+	WHERE (1=1)
+	<if test="null!=schoolId and schoolId!=''">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=vague and vague!=''">
+	AND (base_baby.`name` LIKE concat(concat('%',#{vague}),'%')
+	OR base_class.class_name LIKE concat(concat('%',#{vague}),'%')
+	OR base_school.`name` LIKE concat(concat('%',#{vague}),'%')
+	)
+	</if>
+	<if test="null!=classId and classId!=''">
+	AND base_class.id = #{classId}
+	</if>
+	<if test="null!=checkFlag">
+	AND mem_leave_record.check_flag = #{checkFlag}
+	</if>
+	<if test="null!=memberType">
+	AND mem_leave_record.member_type = #{memberType}
+	</if>
+	<if test="deleteFlag==0 or deleteFlag==1">
+	AND mem_leave_record.delete_flag = #{deleteFlag}
+	</if>
+    </select>
+</mapper>

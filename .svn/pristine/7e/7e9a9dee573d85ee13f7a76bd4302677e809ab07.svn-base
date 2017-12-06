@@ -1,0 +1,50 @@
+package com.vision.edu.wechat.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import me.chanjar.weixin.mp.api.WxMpConfigStorage;
+import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
+
+/**
+ * 微信公众号主配置
+ * <p>
+ * Created by bjliumingbo on 2017/5/12.
+ *
+ * @author FirenzesEagle
+ * @author BinaryWang
+ */
+@Configuration
+public class MainConfiguration {
+	@Value("#{wxProperties.wx_appid}")
+	private String appId;
+
+	@Value("#{wxProperties.wx_appsecret}")
+	private String appSecret;
+
+	@Value("#{wxProperties.wx_token}")
+	private String token;
+
+	@Value("#{wxProperties.wx_aeskey}")
+	private String aesKey;
+
+	@Bean
+	public WxMpConfigStorage wxMpConfigStorage() {
+		WxMpInMemoryConfigStorage configStorage = new WxMpInMemoryConfigStorage();
+		configStorage.setAppId(this.appId);
+		configStorage.setSecret(this.appSecret);
+		configStorage.setToken(this.token);
+		configStorage.setAesKey(this.aesKey);
+		return configStorage;
+	}
+
+	@Bean
+	public WxMpService wxMpService() {
+		WxMpService wxMpService = new WxMpServiceImpl();
+		wxMpService.setWxMpConfigStorage(wxMpConfigStorage());
+		return wxMpService;
+	}
+}

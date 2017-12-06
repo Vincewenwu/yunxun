@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/aop   
+    http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+	http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd  
+	http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task-4.0.xsd
+	http://www.springframework.org/schema/util 
+	http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- 引入属性配置文件 -->
+	<bean id="properties" class="com.vision.edu.framework.util.PropertiesUtil">
+		<property name="locations">
+			<list>
+				<value>classpath:config/system.properties</value>
+				<value>classpath:config/jdbc.properties</value>
+			</list>
+		</property>
+		<property name="decryptProperties">
+			<array>
+				<!-- 需要解密的配置 -->
+				<value>password</value>
+			</array>
+		</property>
+	</bean>
+	<import resource="classpath*:spring-service-bean.xml" />
+	<util:properties id="wxProperties" location="classpath:config/wx.properties"/>
+    <util:properties id="wxPayProperties" location="classpath:config/wxPay.properties"/>
+	<!-- 开启注解 -->
+	<context:annotation-config />
+
+	<!-- 扫描包com.vision.edu.dao,com.vision.edu.service 注解为Service和Repository的类 -->
+	<context:component-scan base-package="com.vision.edu.mapper,com.vision.edu.service,com.vision.edu.wechat.service,com.vision.edu.wechat.handler">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+	</context:component-scan>
+	<import resource="classpath:spring-mybatis.xml" />
+	<import resource="classpath:applicationContext-shiro.xml" />
+	<import resource="classpath:spring-ehcache.xml"></import>
+	<!-- <import resource="classpath:spring-dubbo-customer.xml"/> -->
+</beans>

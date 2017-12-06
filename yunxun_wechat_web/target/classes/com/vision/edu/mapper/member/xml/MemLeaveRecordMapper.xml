@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemLeaveRecordMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemLeaveRecord">
+		<id column="id" property="id" />
+		<result column="addresseeid" property="addresseeid" />
+		<result column="member_id" property="memberId" />
+		<result column="member_type" property="memberType" />
+		<result column="class_id" property="classId" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="day_count" property="dayCount" />
+		<result column="when_long" property="whenLong" />
+		<result column="telephone" property="telephone" />
+		<result column="reason" property="reason" />
+		<result column="state" property="state" />
+		<result column="create_time" property="createTime" />
+		<result column="remarks" property="remarks" />
+		<result column="leave_type" property="leaveType" />
+		<result column="check_time" property="checkTime" />
+		<result column="check_man" property="checkMan" />
+		<result column="check_flag" property="checkFlag" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据教师id查询请假审批记录 -->
+	<select id="findAskForLeaveApproval" resultType="com.vision.edu.dto.MemLeaveRecordDto">
+		SELECT
+		    mem_leave_record.id,
+			base_baby.head_portrait AS headPortrait,
+			base_baby.`name` AS babyName,
+			base_class.class_name AS className,
+			mem_leave_record.addresseeid,
+			mem_leave_record.member_id AS memberId,
+			mem_leave_record.member_type AS memberType,
+			mem_leave_record.class_id AS classId,
+			mem_leave_record.start_time AS startTime,
+			mem_leave_record.end_time AS endTime,
+			mem_leave_record.day_count AS dayCount,
+			mem_leave_record.when_long AS whenLong,
+			mem_leave_record.telephone,
+			mem_leave_record.reason,
+			mem_leave_record.state,
+			mem_leave_record.create_time AS createTime,
+			mem_leave_record.remarks,
+			mem_leave_record.leave_type AS leaveType,
+			mem_leave_record.check_flag AS checkFlag
+		FROM
+			base_baby
+		INNER JOIN mem_leave_record ON base_baby.id = mem_leave_record.member_id
+		INNER JOIN base_class ON base_class.id = mem_leave_record.class_id
+		WHERE
+			mem_leave_record.addresseeid = #{addresseeId}
+		AND mem_leave_record.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_leave_record.check_flag ASC
+	</select>
+	
+	<!-- 根据请假记录id查询出请假信息详情 -->
+	<select id="findleaveTheDetails" resultType="com.vision.edu.dto.MemLeaveRecordDto">
+		SELECT
+			base_baby.head_portrait AS headPortrait,
+			base_baby.`name` AS babyName,
+			base_class.class_name AS className,
+			mem_leave_record.addresseeid,
+			mem_leave_record.member_id AS memberId,
+			mem_leave_record.member_type AS memberType,
+			mem_leave_record.class_id AS classId,
+			mem_leave_record.start_time AS startTime,
+			mem_leave_record.end_time AS endTime,
+			mem_leave_record.day_count AS dayCount,
+			mem_leave_record.when_long AS whenLong,
+			mem_leave_record.telephone,
+			mem_leave_record.reason,
+			mem_leave_record.state,
+			mem_leave_record.create_time AS createTime,
+			mem_leave_record.remarks,
+			mem_leave_record.leave_type AS leaveType,
+			mem_leave_record.check_flag AS checkFlag,
+			mem_leave_record.id
+		FROM
+			base_baby
+		INNER JOIN mem_leave_record ON base_baby.id = mem_leave_record.member_id
+		INNER JOIN base_class ON base_class.id = mem_leave_record.class_id
+		WHERE
+			mem_leave_record.id = #{leaveRecordId}
+		AND mem_leave_record.delete_flag = #{deleteFlag}
+	</select>
+
+</mapper>

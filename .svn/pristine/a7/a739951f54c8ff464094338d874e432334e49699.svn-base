@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseBabyMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseBaby">
+		<id column="id" property="id" />
+		<result column="class_id" property="classId" />
+		<result column="sex" property="sex" />
+		<result column="name" property="name" />
+		<result column="birthday" property="birthday" />
+		<result column="head_portrait" property="headPortrait" />
+		<result column="age" property="age" />
+		<result column="student_num" property="studentNum" />
+		<result column="entrance_time" property="entranceTime" />
+		<result column="state" property="state" />
+		<result column="expiration_date" property="expirationDate" />
+		<result column="warning_days" property="warningDays" />
+		<result column="attendance_card" property="attendanceCard" />
+		<result column="current_binding_count" property="currentBindingCount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="mobile" property="mobile" />
+	</resultMap>
+
+
+	<!--chenwenwu 查宝贝信息加分页 -->
+	<select id="findBaseBabyPage" resultType="com.vision.edu.dto.BaseBabySchoolDTO">
+SELECT
+	base_baby.id,
+	base_baby.sex,
+	base_baby.`name` AS `name`,
+	base_baby.birthday,
+	base_baby.head_portrait AS headPortrait,
+	base_baby.age,
+	base_baby.student_num,
+	base_baby.entrance_time,
+	base_baby.state,
+	base_baby.expiration_date,
+	base_baby.warning_days,
+	base_baby.current_binding_count,
+	base_baby.create_time AS createTime,
+	base_baby.create_mam,
+	base_baby.update_time,
+	base_baby.update_man,
+	base_baby.delete_flag AS deleteFlag,
+	base_school.id AS schoolid,
+	base_school.`name` AS schoolname,
+	GROUP_CONCAT(mem_baby_cards.card_num) AS cardNums,
+	mem_baby_cards.id AS cardID,
+	base_group.`name` AS groupName,
+	mem_parent_baby.relationship as relationship
+FROM
+	base_baby
+INNER JOIN base_school ON base_baby.school_id = base_school.id
+INNER JOIN mem_baby_cards ON base_baby.id = mem_baby_cards.baby_id
+LEFT JOIN mem_member_group ON mem_member_group.baby_id = base_baby.id
+LEFT JOIN base_group ON mem_member_group.group_id = base_group.id
+LEFT JOIN mem_parent_baby ON base_baby.id = mem_parent_baby.baby_id
+		WHERE
+		base_school.id  LIKE concat('%',#{baseBabySchoolDTO.schoolid},'%')  
+		AND base_baby.`name` LIKE concat('%',#{baseBabySchoolDTO.name},'%')
+		AND base_school.`name` LIKE concat('%',#{baseBabySchoolDTO.schoolname},'%')
+		AND mem_baby_cards.card_num LIKE
+		concat('%',#{baseBabySchoolDTO.cardNums},'%')
+		GROUP BY
+		base_baby.id
+	</select>
+
+	<!--chenwenwu 查宝贝信息加分页加分组 -->
+	<select id="findBaseBabyPageAndGroup" resultType="com.vision.edu.dto.BaseBabySchoolDTO">
+		SELECT
+	base_baby.id,
+	base_baby.class_id,
+	base_baby.sex,
+	base_baby.`name` AS `name`,
+	base_baby.birthday,
+	base_baby.head_portrait AS headPortrait,
+	base_baby.age,
+	base_baby.student_num,
+	base_baby.entrance_time,
+	base_baby.state,
+	base_baby.expiration_date,
+	base_baby.warning_days,
+	base_baby.current_binding_count,
+	base_baby.create_time AS createTime,
+	base_baby.create_mam,
+	base_baby.update_time,
+	base_baby.update_man,
+	base_baby.delete_flag AS deleteFlag,
+	base_school.id AS schoolid,
+	base_school.`name` AS schoolname,
+	mem_member_group.group_id AS groupID,
+	base_group.`name` AS groupName
+FROM
+	base_baby
+INNER JOIN base_school ON base_baby.school_id = base_school.id
+INNER JOIN mem_member_group ON base_baby.id = mem_member_group.baby_id
+INNER JOIN base_group ON mem_member_group.group_id = base_group.id
+		WHERE
+		base_school.id LIKE concat('%',#{baseBabySchoolDTO.schoolid},'%')
+		AND base_school.`name` LIKE concat('%',#{baseBabySchoolDTO.schoolname},'%')
+		AND mem_member_group.group_id=#{baseBabySchoolDTO.groupID}
+	</select>
+
+	<!--chenwenwu -->
+	<select id="findBaseBabySurrogatePage1" resultType="com.vision.edu.dto.BaseBabySurrogateDTO">
+		SELECT
+		base_surrogate.`name`,
+		base_surrogate.phone,
+		base_surrogate.idcard,
+		base_surrogate.id,
+		base_surrogate.create_time,
+		base_surrogate.create_mam,
+		base_surrogate.update_time,
+		base_surrogate.update_man,
+		base_surrogate.delete_flag,
+		mem_baby_surrogate.relationship,
+		base_baby.attendance_card
+		FROM
+		mem_baby_surrogate
+		INNER JOIN base_baby ON mem_baby_surrogate.parent_baby_id = base_baby.id
+		INNER JOIN base_surrogate ON mem_baby_surrogate.surrogate_id = base_surrogate.id
+		where
+		mem_baby_surrogate.parent_baby_id=#{babyid}
+	</select>
+
+	<select id="findSurrogateidBYboyid" resultType="com.vision.edu.dto.BabySurrogateDTO">
+		SELECT
+		mem_parent_baby.baby_id AS babyID,
+		mem_baby_surrogate.surrogate_id AS surrogateID,
+		mem_parent_baby.id
+		FROM
+		mem_parent_baby
+		INNER JOIN mem_baby_surrogate ON mem_parent_baby.baby_id = mem_baby_surrogate.parent_baby_id
+		WHERE
+		mem_parent_baby.baby_id = #{babyid}
+	</select>
+
+
+	<!--chenwenwu -->
+	<select id="findBaseBabySurrogatePage" resultType="com.vision.edu.dto.BabySurrogateDTO">
+		SELECT
+		base_baby.id,
+		base_surrogate.id AS surrogateID,
+		mem_baby_surrogate.surrogate_id AS memsurrogateID
+		FROM
+		base_baby
+		INNER JOIN mem_baby_surrogate ON base_baby.id = mem_baby_surrogate.parent_baby_id
+		INNER JOIN base_surrogate ON mem_baby_surrogate.surrogate_id = base_surrogate.id
+		where base_baby.id=#{babyid}
+	</select>
+
+	<!--chenwenwu 查找家长信息 -->
+	<select id="findParentInfonation" resultType="com.vision.edu.dto.PreantInfomationDTO">
+		SELECT
+		base_baby.id AS babyID,
+		mem_member.id AS parentID,
+		mem_parent_baby.relationship,
+		base_member.head_portrait,
+		base_member.`name`,
+		base_member.phone_num,
+		mem_parent_baby.delete_flag AS deleteFlag
+		FROM
+		base_baby
+		INNER JOIN mem_parent_baby ON base_baby.id = mem_parent_baby.baby_id
+		INNER JOIN mem_member ON mem_member.id = mem_parent_baby.member_id
+		INNER JOIN base_member ON mem_member.base_member_id = base_member.id
+		where base_baby.id=#{babyid}
+		and mem_member.id LIKE concat('%',#{parentid},'%')
+	</select>
+
+	<!--chenwenwu 根据家长ID查找家长宝贝ID -->
+	<select id="findMenParentBabyID" resultType="com.vision.edu.dto.PreantInfomationDTO">
+		SELECT
+		mem_member.id AS parentID,
+		mem_parent_baby.id AS memParentBabyID
+		FROM
+		base_baby
+		INNER JOIN mem_parent_baby ON base_baby.id = mem_parent_baby.baby_id
+		INNER JOIN mem_member ON mem_member.id = mem_parent_baby.member_id
+		INNER JOIN base_member ON mem_member.base_member_id = base_member.id
+		WHERE
+		mem_member.id =#{parentid}
+	</select>
+
+	<!-- 查询班级与年级信息 wuying -->
+	<select id="findGradeAndClass" resultType="com.vision.edu.entity.base.BaseBaby">
+		SELECT
+		base_baby.id,
+		base_baby.name ,
+		base_baby.class_id AS classId,
+		base_class.class_name AS className,
+		base_grade.id AS gradeId,
+		base_grade.grade_name AS gradeName,
+		base_class.school_id AS schoolId,
+		base_school.name AS schoolName,
+		mem_baby_team.id AS babyTeamId,
+		CASE
+		WHEN base_baby.delete_flag = 0 THEN
+		'正常'
+		ELSE
+		'删除'
+		END STATUS
+		FROM
+		base_baby
+		INNER JOIN mem_baby_team ON mem_baby_team.baby_id = base_baby.id
+		INNER JOIN base_class ON base_class.id=mem_baby_team.class_id
+		INNER JOIN base_grade ON base_grade.id=base_class.grade_id
+		INNER JOIN base_school ON base_school.id=mem_baby_team.school_id
+		WHERE base_baby.delete_flag = 0 
+		<if test="map.className !=null and map.className!=''">
+			AND base_class.class_name LIKE concat(concat('%',#{map.className}),'%')
+		</if>
+		<if test="map.gradeName !=null and map.gradeName!=''">
+			AND base_grade.`grade_name` LIKE concat(concat('%',#{map.gradeName}),'%')
+		</if>
+		<if test="map.babyName !=null and map.babyName!=''">
+			AND base_baby.`name` LIKE concat(concat('%',#{map.babyName}),'%')
+		</if>
+		<if test="null!=map.schoolId and map.schoolId!=''">
+			AND base_baby.school_id = #{map.schoolId}
+		</if>
+		GROUP BY base_baby.name
+	</select>
+
+	<!-- 自定义宝贝信息集 -->
+	<resultMap id="BabyPoResultMap" type="com.vision.edu.dto.apiVo.BabyPo">
+		<id column="id" property="id" />
+		<result column="gradeId" property="gradeId" />
+		<result column="gradeName" property="gradeName" />
+		<result column="classId" property="classId" />
+		<result column="className" property="className" />
+		<result column="headPortrait" property="headPortrait" />
+		<result column="name" property="name" />
+		<collection column="cardNum" property="cards" ofType="java.lang.String">
+			<result column="cardNum" property="cardNum" />
+		</collection>
+		<collection column="surrogateName" property="guardians" ofType="com.vision.edu.dto.apiVo.GuardianPo">
+			<id column="surrogateName" property="name" />
+			<result column="relation" property="relation" />
+			<result column="surrogateHeadurl" property="surrogateHeadurl" />
+		</collection>
+	</resultMap>
+	<!-- 根据园校id查询园校的所有孩子 -->
+	<select id="findBabyBySchoolId" resultMap="BabyPoResultMap">
+		SELECT
+		    base_baby.id AS id,
+		    base_grade.id AS gradeId,
+		    base_grade.grade_name AS gradeName,
+		    base_class.id AS classId,
+		    base_class.class_name AS className,
+		    base_baby.head_portrait AS headPortrait,
+		    base_baby.`name`,
+		    mem_baby_cards.card_num AS cardNum,
+		    base_surrogate.`name` AS surrogateName,
+		    mem_baby_surrogate.relationship AS relation,
+		    base_surrogate.headurl AS surrogateHeadurl
+		FROM
+		    base_baby		    
+		LEFT JOIN base_class ON base_baby.class_id = base_class.id AND base_class.delete_flag=0
+		LEFT JOIN base_grade ON base_class.grade_id = base_grade.id AND base_grade.delete_flag =0
+		INNER JOIN mem_parent_baby ON mem_parent_baby.baby_id = base_baby.id AND mem_parent_baby.delete_flag=0
+		LEFT JOIN mem_baby_cards ON mem_baby_cards.baby_id = base_baby.id AND mem_baby_cards.delete_flag =0 AND mem_baby_cards.blockup_flag=0
+		LEFT JOIN mem_baby_surrogate ON mem_baby_surrogate.parent_baby_id = base_baby.id AND mem_baby_surrogate.delete_flag=0
+		LEFT JOIN base_surrogate ON mem_baby_surrogate.surrogate_id = base_surrogate.id AND base_surrogate.delete_flag=0
+		WHERE
+		  base_baby.school_id = #{baseSchool.id}
+	</select>
+<!-- jiangwangying 查询已分班、未分班宝贝 -->
+<select id="findBabyToFenBan" resultType="com.vision.edu.dto.ClassBabyDTO">
+	SELECT
+		base_baby.id,
+		base_baby.head_portrait AS headPortrait,
+		base_baby.`name`,
+		base_baby.entrance_time AS entranceTime,
+		base_baby.delete_flag AS deleteFlag,
+		base_school.`name` AS schoolName,
+		base_school.id AS schoolId,
+		base_class.class_name AS className,
+		base_baby.state
+	FROM
+		base_baby
+	LEFT JOIN base_school ON base_baby.school_id = base_school.id
+	LEFT JOIN base_class ON base_baby.class_id = base_class.id
+	WHERE
+		(1 = 1)
+    <if test="null!=schoolId and schoolId!=''">
+	AND base_baby.school_id = #{schoolId}
+	</if>
+	<if test="selType==1">
+	AND base_baby.class_id != ''
+	</if>
+	<if test="null!=classId and classId!=''">
+	 AND base_baby.class_id = #{classId}
+	</if>
+	<if test="selType==2">
+	 AND (base_baby.class_id is NULL OR base_baby.class_id = '') AND base_baby.delete_flag = 0
+	</if>
+	<if test="null!=vague and vague!=''">
+	AND (base_baby.name LIKE concat('%',#{vague},'%')
+	OR base_school.`name` LIKE concat('%',#{vague},'%')
+	OR base_class.class_name LIKE concat('%',#{vague},'%'))
+	</if>
+</select>
+
+<!--chenwenwu -->
+<select id="findBaseParentingKnowledge" resultType="com.vision.edu.dto.BaseParentingKnowledgeDTO">
+SELECT
+	base_parenting_knowledge.serial_num AS serialNum,
+	base_parenting_knowledge.title,
+	base_parenting_knowledge.`name`,
+	base_parenting_knowledge.image,
+	base_parenting_knowledge.url,
+	base_parenting_knowledge.content,
+	base_parenting_knowledge.disable_no AS disableNo,
+	base_parenting_knowledge.create_time AS createTime,
+	base_parenting_knowledge.create_mam AS createMam,
+	base_parenting_knowledge.delete_flag AS deleteFlag,
+	base_parenting_knowledge.start_time AS startTime,
+	base_parenting_knowledge.end_time AS endTime,
+	base_parenting_knowledge.range_type AS rangeType,
+	base_parenting_knowledge.school_id AS schoolID,
+	base_parenting_knowledge.leble_id AS lebleID,
+	base_school.`name` AS shoolName,
+	baseMember.`name` AS memName,
+	MemMember.`name` AS sysName,
+	base_parenting_knowledge.id,
+	base_lable.lable_name AS lableName
+FROM
+	base_parenting_knowledge
+INNER JOIN base_school ON base_parenting_knowledge.school_id = base_school.id
+LEFT JOIN sys_user ON base_parenting_knowledge.publisher_id = sys_user.id
+LEFT JOIN mem_member ON base_parenting_knowledge.publisher_id = mem_member.id
+LEFT JOIN base_member AS baseMember ON mem_member.base_member_id = baseMember.id
+LEFT JOIN base_member AS MemMember ON sys_user.base_member_id = MemMember.id
+INNER JOIN base_lable ON base_parenting_knowledge.leble_id = base_lable.id
+where  base_parenting_knowledge.school_id  LIKE concat('%',#{baseParentingKnowledgeDTO.schoolID},'%') and
+       base_parenting_knowledge.`name` LIKE concat('%',#{baseParentingKnowledgeDTO.name},'%') 
+</select>
+
+<!--chenwenwu -->
+<select id="findOneBaseParentingKnowledge" resultType="com.vision.edu.dto.BaseParentingKnowledgeDTO">
+SELECT
+	base_parenting_knowledge.id,
+	base_parenting_knowledge.publisher_id as publisherid,
+	base_parenting_knowledge.serial_num as serialNum,
+	base_parenting_knowledge.title,
+	base_parenting_knowledge.`name`,
+	base_parenting_knowledge.image,
+	base_parenting_knowledge.url,
+	base_parenting_knowledge.content,
+	base_parenting_knowledge.start_time as startTime,
+	base_parenting_knowledge.end_time as endTime,
+	base_parenting_knowledge.range_type as rangeType,
+	base_parenting_knowledge.school_id as schoolID,
+	base_parenting_knowledge.leble_id as lebleID
+FROM
+	base_parenting_knowledge
+where  base_parenting_knowledge.id =#{id}
+</select>
+
+<!--chenwenwu -->
+<select id="findbabyCodeByshoolID" resultType="com.vision.edu.entity.base.BaseBaby">
+SELECT
+base_baby.student_num as studentNum,
+base_baby.school_id
+FROM
+base_baby
+where base_baby.school_id=#{schoolid}
+ORDER BY
+base_baby.`code` DESC,
+studentNum DESC
+LIMIT 1
+</select>
+
+<!-- 
+	查询宝贝姓名和教师ID
+	@author xiefan
+ -->
+<select id="findBabyNameAndTeacherId" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT base_baby.head_portrait AS headPortrait,base_class.class_name AS className, base_baby.`name`, base_class.teacher_id AS userId FROM base_baby
+	INNER JOIN base_class ON base_baby.class_id = base_class.id
+	WHERE base_baby.delete_flag = 0  AND base_baby.id = #{babyId}
+	LIMIT 1
+</select>
+</mapper>

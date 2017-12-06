@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemDynamicMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemDynamic">
+		<id column="id" property="id" />
+		<result column="resources_id" property="resourcesId" />
+		<result column="resources_type" property="resourcesType" />
+		<result column="school_id" property="schoolId" />
+		<result column="class_id" property="classId" />
+		<result column="browse_count" property="browseCount" />
+		<result column="point_count" property="pointCount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam_id" property="createMamId" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 和班-全部动态 -->
+	<select id="findWholeInformation" resultType="com.vision.edu.dto.MemDynamicDto">
+		SELECT
+			mem_dynamic.id,
+			mem_dynamic.resources_id AS resourcesId,
+			mem_dynamic.resources_type AS resourcesType,
+			mem_dynamic.school_id AS schoolId,
+			mem_dynamic.class_id AS classId,
+			mem_dynamic.browse_count AS browseCount,
+			mem_dynamic.point_count AS pointCount,
+			mem_dynamic.create_time AS createTime,
+			mem_dynamic.create_mam_id AS createMamId
+		FROM
+			mem_dynamic
+		WHERE
+			mem_dynamic.class_id = #{classId}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+	
+	<!-- 根据状态查询和班信息 -->
+	<select id="findAKindOfDynamic" resultType="com.vision.edu.dto.MemDynamicDto">
+		SELECT
+			mem_dynamic.id,
+			mem_dynamic.resources_id AS resourcesId,
+			mem_dynamic.resources_type AS resourcesType,
+			mem_dynamic.school_id AS schoolId,
+			mem_dynamic.class_id AS classId,
+			mem_dynamic.browse_count AS browseCount,
+			mem_dynamic.point_count AS pointCount,
+			mem_dynamic.create_time AS createTime,
+			mem_dynamic.create_mam_id AS createMamId
+		FROM
+			mem_dynamic
+		WHERE
+			mem_dynamic.class_id = #{classId}
+		AND mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+
+</mapper>

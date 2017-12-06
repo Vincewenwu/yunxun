@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">  
+     
+    <diskStore path="java.io.tmpdir/ehcache"/>  
+      
+    <!-- 默认缓存 -->  
+    <defaultCache  
+           maxElementsInMemory="10000"  
+           eternal="false"  
+           timeToLiveSeconds="6000"  
+           overflowToDisk="false"/>  
+           
+    <!-- 默认微信token7200秒的缓存策略 -->        
+    <cache name="wxCache" 
+		   maxElementsInMemory="10000" 
+		   eternal="false" 
+		   timeToLiveSeconds="6000" 
+		   overflowToDisk="true"/> 
+		   
+    <!-- service 缓存配置 -->
+	<cache name="serviceCache"
+		eternal="false"  
+	    maxElementsInMemory="100" 
+	    overflowToDisk="false" 
+	    diskPersistent="false"  
+	    timeToIdleSeconds="0" 
+	    timeToLiveSeconds="300"  
+	    memoryStoreEvictionPolicy="LRU" />   
+</ehcache>

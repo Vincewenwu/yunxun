@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseDutiesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseDuties">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="duties_name" property="dutiesName" />
+		<result column="description" property="description" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag2" property="deleteFlag2" />
+		<result column="update_man" property="updateMan" />
+	</resultMap>
+	<!-- 查询职务 author: jiangwangying -->
+    <select id="findDutiesByVague" resultType="com.vision.edu.dto.DutiesDTO">
+	SELECT
+		base_duties.id,
+		base_duties.school_id AS schoolId,
+		base_duties.duties_name AS dutiesName,
+		base_school.`name` AS schoolName,
+		base_duties.description,
+		base_duties.delete_flag2 AS deleteFlag2
+	FROM
+		base_duties
+	LEFT JOIN base_school ON base_duties.school_id = base_school.id
+	WHERE  (1=1)
+	<if test="null!=schoolId and schoolId!='' ">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=vague and vague.trim()!='' ">
+	AND  base_duties.duties_name LIKE concat('%',#{vague},'%') OR base_school.name LIKE concat('%',#{vague},'%')  
+	</if>
+    </select>
+</mapper>

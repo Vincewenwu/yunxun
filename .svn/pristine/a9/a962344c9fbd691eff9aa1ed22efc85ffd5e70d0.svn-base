@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemOrderMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemOrder">
+		<id column="id" property="id" />
+		<result column="state" property="state" />
+		<result column="order_time" property="orderTime" />
+		<result column="pay_time" property="payTime" />
+		<result column="payment_type" property="paymentType" />
+		<result column="user_id" property="userId" />
+		<result column="order_type" property="orderType" />
+		<result column="combo_id" property="comboId" />
+		<result column="order_num" property="orderNum" />
+		<result column="total_amount" property="totalAmount" />
+		<result column="discount_amount" property="discountAmount" />
+		<result column="pay_amount" property="payAmount" />
+		<result column="cancel_time" property="cancelTime" />
+		<result column="cancel_type" property="cancelType" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="when_long" property="whenLong" />
+	</resultMap>
+  <select id="findOrderInfo" resultType="com.vision.edu.dto.OrderInfoDTO">
+	SELECT
+		mem_order.id,
+		mem_order.order_num AS orderNum,
+		mem_order.state,
+		mem_order.when_long AS whenLong,
+		mem_order.order_time AS orderTime,
+		mem_order.payment_type AS paymentType,
+		mem_order.pay_time AS payTime,
+		mem_order.order_type AS orderType,
+		mem_order.discount_amount AS discountAmount,
+		mem_order.total_amount AS totalAmount,
+		mem_order.pay_amount AS payAmount,
+		mem_order.cancel_time AS cancelTime,
+		mem_order.cancel_type AS cancelType,
+		mem_order.delete_flag AS deleteFlag,
+		base_baby.`name` AS babyName,
+		base_combo.`name` AS comboName,
+		base_combo.price AS comboPrice,
+		mem_order.create_time AS createTime,
+		base_school.`name` AS schoolName,
+		base_member.`name` AS memberName
+	FROM
+		mem_order
+	INNER JOIN base_baby ON mem_order.baby_id = base_baby.id
+	INNER JOIN base_combo ON mem_order.combo_id = base_combo.id
+	INNER JOIN base_school ON base_baby.school_id = base_school.id
+	INNER JOIN mem_member ON mem_order.member_id = mem_member.id
+	INNER JOIN base_member ON mem_member.base_member_id = base_member.id
+	<if test="null != vague and vague!=''">
+	AND (base_school.`name`  LIKE CONCAT('%',#{vague},'%')
+	OR base_combo.`name`  LIKE CONCAT('%',#{vague},'%')
+	OR base_member.`name` LIKE CONCAT('%',#{vague},'%'))
+	</if>
+	<if test="null != orderState and orderState!=''">
+	AND mem_order.state = #{orderState}
+	</if>
+	<if test="null != starteTime and starteTime!=''">
+	AND mem_order.order_time BETWEEN  #{starteTime} AND #{endTime} 
+	</if>
+	order by createTime  DESC
+    </select>
+</mapper>

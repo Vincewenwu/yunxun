@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemGrowthMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemGrowth">
+		<id column="id" property="id" />
+		<result column="publisher_id" property="publisherId" />
+		<result column="create_time" property="createTime" />
+		<result column="summary" property="summary" />
+		<result column="resource_set" property="resourceSet" />
+		<result column="dynamic_content" property="dynamicContent" />
+		<result column="content_type" property="contentType" />
+		<result column="dynamic_type" property="dynamicType" />
+		<result column="relation_baby_ids" property="relationBabyIds" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据班级id查询和班中的成长轨迹 -->
+	<select id="findGrowthTrack" resultType="com.vision.edu.dto.MemGrowthDto">
+		SELECT
+			MemBaseMember.head_portrait AS headPortrait,
+			MemBaseMember.`name` AS memberName,
+			mem_growth.publisher_id AS publisherId,
+			mem_growth.create_time AS createTime,
+			mem_growth.summary,
+			mem_growth.resource_set AS resourceSet,
+			mem_growth.dynamic_content AS dynamicContent,
+			mem_growth.content_type AS contentType,
+			mem_growth.dynamic_type AS dynamicType,
+			mem_growth.relation_baby_ids AS relationBabyIds,
+			userBaseMember.head_portrait AS userHeadPortrait,
+			userBaseMember.`name` AS userName,
+			base_duties.duties_name AS dutiesName
+		FROM
+			mem_dynamic
+		INNER JOIN mem_growth ON mem_growth.id = mem_dynamic.resources_id
+		LEFT OUTER JOIN mem_member ON mem_member.id = mem_growth.publisher_id
+		LEFT OUTER JOIN base_member AS MemBaseMember ON MemBaseMember.id = mem_member.base_member_id
+		LEFT OUTER JOIN sys_user ON sys_user.id = mem_growth.publisher_id
+		LEFT OUTER JOIN base_member AS userBaseMember ON userBaseMember.id = sys_user.base_member_id
+		LEFT OUTER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			mem_dynamic.class_id = #{classId} 
+		AND mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+	
+	<!-- 成长轨迹集合字段 -->
+	<select id="findGrowthTrajectoryCollectionField" resultType="com.vision.edu.dto.MemGrowthDto">
+		SELECT
+			MemBaseMember.head_portrait AS headPortrait,
+			MemBaseMember.`name` AS memberName,
+			mem_growth.publisher_id AS publisherId,
+			mem_growth.create_time AS createTime,
+			mem_growth.summary,
+			mem_growth.resource_set AS resourceSet,
+			mem_growth.dynamic_content AS dynamicContent,
+			mem_growth.content_type AS contentType,
+			mem_growth.dynamic_type AS dynamicType,
+			mem_growth.relation_baby_ids AS relationBabyIds,
+			userBaseMember.head_portrait AS userHeadPortrait,
+			userBaseMember.`name` AS userName,
+			base_duties.duties_name AS dutiesName
+		FROM
+			mem_dynamic
+		INNER JOIN mem_growth ON mem_growth.id = mem_dynamic.resources_id
+		LEFT OUTER JOIN mem_member ON mem_member.id = mem_growth.publisher_id
+		LEFT OUTER JOIN base_member AS MemBaseMember ON MemBaseMember.id = mem_member.base_member_id
+		LEFT OUTER JOIN sys_user ON sys_user.id = mem_growth.publisher_id
+		LEFT OUTER JOIN base_member AS userBaseMember ON userBaseMember.id = sys_user.base_member_id
+		LEFT OUTER JOIN base_duties ON base_duties.id = sys_user.duties_id
+		WHERE
+			mem_dynamic.resources_type = #{resourcesType}
+		AND mem_dynamic.resources_id = #{resourcesId}
+		AND mem_dynamic.delete_flag = #{deleteFlag}
+		ORDER BY
+			mem_dynamic.create_time DESC
+	</select>
+</mapper>

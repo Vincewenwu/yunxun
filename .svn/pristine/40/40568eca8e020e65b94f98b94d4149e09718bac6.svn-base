@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseBabyMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseBaby">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="class_id" property="classId" />
+		<result column="sex" property="sex" />
+		<result column="name" property="name" />
+		<result column="birthday" property="birthday" />
+		<result column="head_portrait" property="headPortrait" />
+		<result column="age" property="age" />
+		<result column="student_num" property="studentNum" />
+		<result column="entrance_time" property="entranceTime" />
+		<result column="state" property="state" />
+		<result column="expiration_date" property="expirationDate" />
+		<result column="warning_days" property="warningDays" />
+		<result column="current_binding_count" property="currentBindingCount" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="binding_code" property="bindingCode" />
+	</resultMap>
+
+</mapper>

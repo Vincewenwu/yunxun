@@ -1,0 +1,66 @@
+package com.vision.edu.core.queue;
+
+import java.io.IOException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.socket.TextMessage;
+
+import com.vision.edu.common.base.BaseEntity;
+import com.vision.edu.core.websocket.handler.SpringWebSocketHandler;
+import com.vision.edu.entity.base.BaseSign;
+import com.vision.edu.framework.util.Sample;
+import com.vision.edu.service.base.IBaseBabyService;
+import com.vision.edu.service.base.IBaseSignService;
+
+public class QueueListener<T> implements RedisQueueListener<BaseSign> {  
+	
+	/**
+	 * 注入baseBabyService
+	 */
+	@Autowired
+	private IBaseBabyService baseBabyService;
+	
+	/**
+	 * 注入baseSignService
+	 */
+	@Autowired
+	private IBaseSignService baseSignService;
+	
+	/**
+	 * 从Spring容器中获取SpringWebSocketHandler
+	 * @author XieFan
+	 * @date 2017年8月12日 下午5:13:03
+	 * @return
+	 */
+	@Bean
+	private SpringWebSocketHandler initHandler() {
+		return new SpringWebSocketHandler();
+	}
+	
+	private final String AUDIO_CONTENT = "的家长已到门口等候";
+
+	@Override
+	public void onMessage(BaseSign baseSign) {
+		BaseEntity baseEntity = baseBabyService.findBabyNameAndTeacherId(baseSign.getBabyId());
+		if (baseEntity == null) {
+			return ;
+		}
+		String audioPath = "";
+		if (StringUtils.isEmpty(baseSign.getVoiceUrl())) {
+			audioPath = Sample.getAudio(baseEntity.getString("name") + AUDIO_CONTENT);
+			baseSign.setVoiceUrl(audioPath);
+			baseSignService.updateById(baseSign);
+		} else {
+			audioPath = baseSign.getVoiceUrl();
+		}
+		try {
+			initHandler().sendMessageToUser(initHandler().getWebSocketSessionByUserId(baseEntity.getString("userId")), new TextMessage(baseEntity.getString("name") + "," + audioPath));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}  
+  
+}  

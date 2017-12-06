@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemOrderMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemOrder">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="state" property="state" />
+		<result column="price" property="price" />
+		<result column="order_time" property="orderTime" />
+		<result column="pay_time" property="payTime" />
+		<result column="payment_type" property="paymentType" />
+		<result column="user_id" property="userId" />
+		<result column="order_type" property="orderType" />
+		<result column="combo_id" property="comboId" />
+		<result column="order_num" property="orderNum" />
+		<result column="total_amount" property="totalAmount" />
+		<result column="discount_amount" property="discountAmount" />
+		<result column="pay_amount" property="payAmount" />
+		<result column="cancel_time" property="cancelTime" />
+		<result column="cancel_type" property="cancelType" />
+		<result column="create_time" property="createTime" />
+		<result column="create_mam" property="createMam" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+</mapper>

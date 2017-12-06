@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemMemberMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemMember">
+		<id column="id" property="id" />
+		<result column="base_member_id" property="baseMemberId" />
+		<result column="disable_flag" property="disableFlag" />
+		<result column="baby_id" property="babyId" />
+		<result column="last_landing_time" property="lastLandingTime" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- 根据会员id查询会员信息 -->
+	<select id="findAccountManagement" resultType="com.vision.edu.dto.MemMemberDto">
+		SELECT
+			mem_member.id,
+			mem_member.base_member_id AS baseMemberId,
+			mem_member.disable_flag AS disableFlag,
+			mem_member.last_landing_time AS lastLandingTime,
+			base_member.school_id AS schoolId,
+			base_member.unionid,
+			base_member.openid,
+			base_member.sex,
+			base_member.`name` AS memberName,
+			base_member.phone_num AS phoneNum,
+			base_member.address,
+			base_member.head_portrait AS headPortrait,
+			base_member.home_phone AS homePhone,
+			base_member.intro,
+			base_member.email,
+			base_member.qq,
+			base_member.id_card_num AS idCardNum,
+			base_member.birth
+		FROM
+			mem_member
+		INNER JOIN base_member ON base_member.id = mem_member.base_member_id
+		WHERE
+			mem_member.id = #{memberId} AND mem_member.delete_flag = #{deleteFlag}
+	</select>
+</mapper>

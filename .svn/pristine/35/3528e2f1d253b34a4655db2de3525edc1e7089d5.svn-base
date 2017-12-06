@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemSchoolRecipeDetailMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemSchoolRecipeDetail">
+		<id column="id" property="id" />
+		<result column="school_recipe_id" property="schoolRecipeId" />
+		<result column="base_recipe_bank_id" property="baseRecipeBankId" />
+		<result column="serial_num" property="serialNum" />
+		<result column="name" property="name" />
+		<result column="cover_images" property="coverImages" />
+		<result column="picture_set" property="pictureSet" />
+		<result column="intro" property="intro" />
+		<result column="food_material" property="foodMaterial" />
+		<result column="nutrient" property="nutrient" />
+		<result column="several_meals" property="severalMeals" />
+		<result column="create_mam" property="createMam" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+
+<!--chenwenwu 根据周次查询周谱-->
+<select id="findMemSchoolRecipeDetails" resultType="com.vision.edu.dto.MemSchoolRecipeDetailDTO" >
+SELECT
+	mem_school_recipe_detail.serial_num AS serialNum,
+	mem_school_recipe_detail.`name`,
+	mem_school_recipe_detail.cover_images AS coverImages,
+	mem_school_recipe_detail.picture_set AS pictureSet,
+	mem_school_recipe_detail.intro,
+	mem_school_recipe_detail.food_material AS foodMaterial,
+	mem_school_recipe_detail.nutrient,
+	mem_school_recipe_detail.several_meals AS severalMeals,
+	base_school.`name` AS shoolName,
+	mem_school_recipe.school_id AS shoolID,
+	mem_school_recipe.publish_time AS publishTime,
+	mem_school_recipe.weekly,
+    mem_school_recipe.id,
+    mem_school_recipe.`name` as shipuname
+FROM
+	mem_school_recipe_detail
+INNER JOIN mem_school_recipe ON mem_school_recipe_detail.school_recipe_id = mem_school_recipe.id
+INNER JOIN base_school ON mem_school_recipe.school_id = base_school.id
+WHERE
+      DATE_FORMAT(mem_school_recipe.publish_time,'%Y') =#{year} AND
+      DATE_FORMAT(mem_school_recipe.publish_time,'%m') =#{month} AND
+      mem_school_recipe.weekly = #{memSchoolRecipeDetailDTO.weekly} AND
+      base_school.id  LIKE concat('%', #{memSchoolRecipeDetailDTO.shoolID},'%')  AND
+      mem_school_recipe.delete_flag=0
+ORDER BY
+publishTime ASC,
+severalMeals ASC
+	</select>
+	
+	
+	<!--chenwenwu 查询周次-->
+<select id="findzhouandyears" resultType="com.vision.edu.dto.MemSchoolRecipeDetailDTO" >
+SELECT
+GROUP_CONCAT(	mem_school_recipe.publish_time 
+	) AS publishTime,
+mem_school_recipe.weekly,
+base_school.`name` as shoolName,
+base_school.id AS shoolID
+FROM
+mem_school_recipe
+INNER JOIN base_school ON mem_school_recipe.school_id = base_school.id
+INNER JOIN mem_school_recipe_detail ON mem_school_recipe.id = mem_school_recipe_detail.school_recipe_id
+where DATE_FORMAT(mem_school_recipe.publish_time,'%Y') =#{year} AND
+      DATE_FORMAT(mem_school_recipe.publish_time,'%m') =#{month} AND
+      base_school.id  LIKE concat('%', #{memSchoolRecipeDetailDTO.shoolID},'%')  
+GROUP BY
+	mem_school_recipe.weekly
+
+	</select>
+	
+</mapper>

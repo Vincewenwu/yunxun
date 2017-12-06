@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemCommentMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemComment">
+		<id column="id" property="id" />
+		<result column="member_id" property="memberId" />
+		<result column="comment" property="comment" />
+		<result column="father_id" property="fatherId" />
+		<result column="source_id" property="sourceId" />
+		<result column="comment_type" property="commentType" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="commentMan" property="commentMan" />
+        <result column="commentManHeadImgUrl" property="commentManHeadImgUrl" />
+        <result column="beCommentMan" property="beCommentMan" />
+        <result column="praiseFlag" property="praiseFlag" />
+        <result column="point_count" property="pointCount" />
+	</resultMap>
+	
+	<select id="findCommentinfo" resultType="com.vision.edu.dto.CommentinfoDto">
+		SELECT
+			mem_comment.member_id AS memberId,
+			mem_comment.`comment` AS memComment,
+			mem_comment.father_id AS fatherId,
+			mem_comment.source_id AS sourceId,
+			mem_comment.comment_type AS commentType,
+			mem_comment.create_time AS createTime,
+			sysUserMember.head_portrait AS sysUserheadPortrait,
+			sysUserMember.`name` AS sysUserName,
+			memMember.head_portrait AS memMemberheadPortrait,
+			memMember.`name` AS memMemberName
+		FROM
+			mem_comment
+		LEFT OUTER JOIN sys_user ON sys_user.id = mem_comment.member_id
+		LEFT OUTER JOIN mem_member ON mem_member.id = mem_comment.member_id
+		LEFT OUTER JOIN base_member AS sysUserMember ON sysUserMember.id = sys_user.base_member_id
+		LEFT OUTER JOIN base_member AS memMember ON memMember.id = mem_member.base_member_id
+		WHERE
+			mem_comment.source_id = #{sourceId}
+		AND mem_comment.delete_flag = #{deleteFlag}
+	</select>
+
+    <!-- 查询顶级评论,如果 zhangfeihong  -->
+    <select id="selectTopCommentList" resultMap="BaseResultMap">
+        SELECT
+            mem_comment.id,
+            mem_comment.member_id,
+            mem_comment.`comment`,
+            mem_comment.father_id,
+            mem_comment.source_id,
+            mem_comment.comment_type,
+            mem_comment.create_time,
+            mem_comment.update_time,
+            mem_comment.update_man,
+            mem_comment.delete_flag,
+            mem_comment.point_count,
+            base_member.`name` AS commentMan,
+            base_member.head_portrait AS commentManHeadImgUrl,
+          IF (IFNULL(mem_praise.cancel_no, 1) = 0,0,1) AS praiseFlag
+        FROM
+            mem_comment
+        INNER JOIN base_member ON mem_comment.member_id = base_member.id
+        LEFT JOIN mem_praise ON mem_comment.member_id = #{memberId}
+        AND mem_comment.id = mem_praise.source_id
+        AND mem_praise.delete_flag = 0
+        WHERE
+            mem_comment.delete_flag = 0
+        AND mem_comment.source_id = #{sourceId}
+    </select>
+    
+	<!-- 查询评论的回复 zhangfeihong -->
+    <select id="selectChildCommentList" resultMap="BaseResultMap">
+		SELECT
+		    mem_comment.id,
+		    mem_comment.member_id,
+		    mem_comment.`comment`,
+		    mem_comment.father_id,
+		    mem_comment.source_id,
+		    mem_comment.comment_type,
+		    mem_comment.create_time,
+		    mem_comment.update_time,
+		    mem_comment.update_man,
+		    mem_comment.delete_flag,
+		    beComment.`name` AS beCommentMan,
+		    base_member.`name` AS commentMan,
+		    IF (base_member.id = #{memberId}, 0, 1) AS editFlag
+		FROM
+		    mem_comment
+		INNER JOIN mem_comment AS father ON mem_comment.source_id = father.id
+		INNER JOIN base_member AS beComment ON father.member_id = beComment.id
+		INNER JOIN base_member ON mem_comment.member_id = base_member.id
+		WHERE
+		    mem_comment.source_id = #{sourceId}
+    </select>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.member.MemChildHomeEvalMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.member.MemChildHomeEval">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="baby_id" property="babyId" />
+		<result column="eval_criter_id" property="evalCriterId" />
+		<result column="weekly" property="weekly" />
+		<result column="star_num" property="starNum" />
+		<result column="create_mam" property="createMam" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- @author WuYing 分页查找宝贝在家评价信息 -->
+	<select id="findAtHomeEvaluating" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		mem_child_home_eval.id,
+		base_school.`name` AS schoolName,
+		base_grade.grade_name AS gradeName,
+		base_class.class_name AS className,
+		mem_child_home_eval.baby_id,
+		mem_child_home_eval.baby_team_id AS babyTeamId,
+		base_baby.`name` AS babyName,
+		base_grade.id AS gradeId,
+		IF (mem_baby_team.team = 0,	CONCAT(mem_baby_team. YEAR,'上学期'),CONCAT(mem_baby_team. YEAR,'下学期')) AS team,
+		sum(mem_child_home_eval.star_num) AS starNum
+	FROM
+		mem_child_home_eval
+		INNER JOIN mem_baby_team ON mem_baby_team.id = mem_child_home_eval.baby_team_id
+		INNER JOIN base_class ON base_class.id = mem_baby_team.class_id
+		INNER JOIN base_grade ON base_grade.id = base_class.grade_id
+		INNER JOIN base_school ON base_school.id = mem_baby_team.school_id
+		INNER JOIN base_baby ON mem_child_home_eval.baby_id = base_baby.id
+	WHERE
+	mem_child_home_eval.delete_flag = 0
+		<if test="map.babyName1 != null and map.babyName1 != '' ">
+			AND base_baby.`name` = #{map.babyName1}
+		</if>
+		<if test="map.babyTeamId !=null and map.babyTeamId !='' ">
+			AND mem_baby_eval.baby_team_id = #{map.babyTeamId }
+		</if>
+	GROUP BY mem_baby_team.id
+	ORDER BY team DESC
+	</select>
+	<!--@author WuYing 查询家长对宝贝评价项目内容 -->
+	<select id="findParentEvalContent" resultType="com.vision.edu.common.base.BaseEntity">
+		SELECT
+			mem_child_home_eval.id,
+			mem_child_home_eval.baby_id,
+	  	base_eval_crite.project_name AS projectName,
+		  base_eval_crite.eval_crite AS evalCrite,
+			MAX(CASE mem_child_home_eval.weekly WHEN 2 THEN mem_child_home_eval.star_num ELSE 0 END ) 第2周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 4 THEN mem_child_home_eval.star_num ELSE 0 END ) 第4周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 6 THEN mem_child_home_eval.star_num ELSE 0 END ) 第6周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 8 THEN mem_child_home_eval.star_num ELSE 0 END ) 第8周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 10 THEN mem_child_home_eval.star_num ELSE 0 END ) 第10周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 12 THEN mem_child_home_eval.star_num ELSE 0 END ) 第12周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 14 THEN mem_child_home_eval.star_num ELSE 0 END ) 第14周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 16 THEN mem_child_home_eval.star_num ELSE 0 END ) 第16周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 18 THEN mem_child_home_eval.star_num ELSE 0 END ) 第18周,
+		 	MAX(CASE mem_child_home_eval.weekly WHEN 20 THEN mem_child_home_eval.star_num ELSE 0 END ) 第20周
+		FROM
+		mem_child_home_eval
+			INNER JOIN base_eval_crite ON mem_child_home_eval.eval_criter_id = base_eval_crite.id
+			INNER JOIN mem_baby_team ON  mem_baby_team.id = mem_child_home_eval.baby_team_id
+		WHERE mem_child_home_eval.delete_flag = 0
+		AND mem_child_home_eval.baby_team_id=#{babyTeamId}
+		GROUP BY base_eval_crite.id
+	</select>
+	<!-- 删除家长对宝贝评价  wuying-->
+	<!-- <select id="updateParentEvaluatingById" parameterType="java.lang.String">
+		update mem_child_home_eval set delete_flag=1,update_man='wuying', update_time=now()
+		WHERE baby_team_id = #{babyTeamId}
+	</select> -->
+
+</mapper>

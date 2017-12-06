@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.system.SysPrincipalMailboxMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.system.SysPrincipalMailbox">
+		<id column="id" property="id" />
+		<result column="father_id" property="fatherId" />
+		<result column="sender_id" property="senderId" />
+		<result column="recipient_id" property="recipientId" />
+		<result column="sender_type" property="senderType" />
+		<result column="letter_content" property="letterContent" />
+		<result column="images" property="images" />
+		<result column="create_time" property="createTime" />
+		<result column="see_time" property="seeTime" />
+		<result column="state" property="state" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	<!-- jiangwangying -->
+    <select id="findPrincipalMail" resultType="com.vision.edu.dto.EmailDTO">
+SELECT
+	sys_principal_mailbox.id,
+	sys_principal_mailbox.sender_type AS senderType,
+	sys_principal_mailbox.letter_content AS letterContent,
+	sys_principal_mailbox.see_time AS seeTime,
+	sys_principal_mailbox.create_time AS createTime,
+	sys_principal_mailbox.state,
+	sys_principal_mailbox.delete_flag AS deleteFlag,
+	base_member.`name` AS sender,
+	base_member.phone_num AS phoneNum,
+	base_member.head_portrait AS headPortrait,
+	base_member.sex,
+	base_member.address,
+	base_school.`name` AS schoolName
+FROM
+	sys_principal_mailbox
+LEFT JOIN base_member ON sys_principal_mailbox.sender_id = base_member.id
+LEFT JOIN base_school ON base_member.school_id = base_school.id
+WHERE  (1 = 1)
+    AND sys_principal_mailbox.sender_type != 3  <!-- 查询非园长的 -->
+	<if test="null!=senderType">
+	AND sys_principal_mailbox.sender_type = #{senderType}
+	</if>
+	<if test="null!=schoolId and schoolId!=''">
+	AND base_school.id = #{schoolId}
+	</if>
+	<if test="null!=vague and vague.trim()!=''">
+	AND base_member.`name` LIKE concat(concat('%',#{vague}),'%')
+	</if>
+	ORDER BY sys_principal_mailbox.create_time DESC
+    </select>
+    <!-- jiangwangying -->
+    <select id="findMailById" resultType="com.vision.edu.dto.EmailDTO">
+	SELECT
+		base_member.`name` AS sender,
+		sys_principal_mailbox.letter_content AS letterContent,
+		sys_principal_mailbox.images,
+		sys_principal_mailbox.create_time AS createTime
+	FROM
+		sys_principal_mailbox
+	INNER JOIN base_member ON sys_principal_mailbox.sender_id = base_member.id
+	WHERE
+		(1 = 1)
+	<if test="null!=id">
+	AND sys_principal_mailbox.id = #{id}
+	</if>
+	<if test="null!=memberId and memberId!=''">
+	AND sys_principal_mailbox.recipient_id = #{memberId}
+	</if>
+    </select>
+    
+</mapper>

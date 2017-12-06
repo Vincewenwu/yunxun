@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+xmlns:mvc="http://www.springframework.org/schema/mvc" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:p="http://www.springframework.org/schema/p" 
+xmlns:task="http://www.springframework.org/schema/task"  
+xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.1.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+		
+	<!-- 读取系统变量 -->
+   <bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:config/system.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+    <!-- task任务扫描注解 -->  
+	<task:annotation-driven/>  
+    
+    <!-- 读取系统变量 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+        <property name="properties" ref="configProperties" />
+    </bean>
+		
+	<!-- 自动扫描controller包下的所有类，使其认为spring mvc的控制器 -->
+	<context:component-scan base-package="com.vision.edu.web.controller">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+	</context:component-scan>
+	<!-- 日期转换  必须放在<mvc:annotation-driven />前面 -->
+	<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"></bean>
+	<mvc:annotation-driven /> 
+    
+    <!-- mvc:annotation-driven 自定义配置1 -->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+	    <property name="converters">
+	      <set>
+	        <bean class="com.vision.edu.platform.util.StringToEnumConverterFactory" />
+	      </set>
+	    </property>
+ 	</bean>
+ 	<!-- mvc:annotation-driven 自定义配置2 -->
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"> 
+		<property name="favorPathExtension" value="false" />
+		<property name="favorParameter" value="false" /> 
+		<property name="ignoreAcceptHeader" value="false" /> 
+		<property name="mediaTypes" > 
+			<value>
+				atom=application/atom+xml
+			 	html=text/html
+				json=application/json
+				*=*/*
+			</value> 
+		</property>
+	</bean>
+
+
+	<!--二进制信息转换  -->
+	<bean id="byteArrayMessageConverter" class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+	 
+	 <!-- 配置JSON视图 -->
+     <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+       <property name="supportedMediaTypes">
+           <list>
+               <value>application/json;charset=UTF-8</value>
+           </list>
+       </property>     
+       <property name="objectMapper">
+           <bean class="com.fasterxml.jackson.databind.ObjectMapper">
+               <property name="dateFormat">
+                   <bean class="java.text.SimpleDateFormat">
+                       <constructor-arg index="0" type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>
+                   </bean>
+               </property>
+           </bean>
+       </property>
+     </bean>
+     
+     <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter"/>
+    
+     <bean id="requestMappingHandlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+       <property name="messageConverters">
+           <list>
+               <!-- json信息转换 -->
+				<ref bean="mappingJacksonHttpMessageConverter" />
+				<ref bean="stringHttpMessageConverter"/>
+				<ref bean="byteArrayMessageConverter"/>
+           </list>
+       </property>
+     </bean>
+
+
+	<!-- 配置静态资源，直接映射到对应的文件夹，不被DispatcherServlet处理 -->  
+    <!--   
+         配置不用DispatcherServlet拦截的路径(例如：图片、CSS样式、js文件...):   
+        路径可以自己设置，这里面我用static(WebRoot中的文件夹);   
+        其中的"**"代表路径及其子路径       
+     -->  
+    <mvc:resources location="/static/" mapping="/static/**"/> 
+    <mvc:resources location="/ueditor/" mapping="/ueditor/**"/>  
+    <mvc:resources location="/uploads/" mapping="/uploads/**"/>
+     
+    
+	
+    <!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->  
+    <bean  
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+        <property name="viewClass"  
+            value="org.springframework.web.servlet.view.JstlView" />  
+        <property name="prefix" value="/WEB-INF/views/"/>  
+        <property name="suffix" value=".jsp"/>  
+    </bean>  
+	 
+	 
+	 
+	 <!-- 在地址栏访问 "网站根路径 + /404",所跳转到的页面404.jsp -->  
+    <mvc:view-controller path="/404" view-name="404"/>  
+    <mvc:view-controller path="/500" view-name="500"/>  
+ 
+      
+      <!-- 上传文件，文件流转换 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!--1024*200即200k 最大文件设置20mb-->  
+        <property name="maxUploadSize" value="20480000"/>  
+        <!--resolveLazily属性启用是为了推迟文件解析，以便在UploadAction 中捕获文件大小异常-->  
+        <property name="resolveLazily" value="true"/>
+	</bean>
+	
+	<!-- FastJson注入 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+            <!-- FastJson -->
+            <bean id="fastJsonHttpMessageConverter"
+                  class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <array value-type="com.alibaba.fastjson.serializer.SerializerFeature">
+                        <!-- 避免循环引用 -->
+                        <value>DisableCircularReferenceDetect</value>
+                        <!-- 是否输出值为null的字段 -->
+                        <value>WriteMapNullValue</value>
+                        <!-- 数值字段如果为null,输出为0,而非null -->
+                        <value>WriteNullNumberAsZero</value>
+                        <!-- 字符类型字段如果为null,输出为"",而非null  -->
+                        <value>WriteNullStringAsEmpty</value>
+                        <!-- List字段如果为null,输出为[],而非null -->
+                        <value>WriteNullListAsEmpty</value>
+                        <!-- Boolean字段如果为null,输出为false,而非null -->
+                        <value>WriteNullBooleanAsFalse</value>
+                    </array>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+     
+</beans>

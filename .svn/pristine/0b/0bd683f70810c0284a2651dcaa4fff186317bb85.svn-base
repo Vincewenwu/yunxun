@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseSignRecordMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseSignRecord">
+		<id column="id" property="id" />
+		<result column="baby_id" property="babyId" />
+		<result column="punch_man_img" property="punchManImg" />
+		<result column="sign_num" property="signNum" />
+		<result column="device_num" property="deviceNum" />
+		<result column="record_type" property="recordType" />
+		<result column="sign_status" property="signStatus" />
+		<result column="surrogate_id" property="surrogateId" />
+		<result column="sign_time" property="signTime" />
+		<result column="temperature" property="temperature" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="time_frame" property="timeFrame" />
+	</resultMap>
+	<!-- jiangwangying  考勤统计 -->
+	<select id="kaoQinTongJi" resultType="com.vision.edu.dto.KaoQinTongJiDTO">
+	SELECT
+		DATE_FORMAT(sign_time, '%Y%m%d') AS signDatas,
+		base_sign_record.baby_id AS babyId,
+		COUNT(base_sign_record.baby_id) AS  signCount,
+		base_baby.head_portrait AS headPortrait,
+		base_school.`name` AS schoolName,
+		base_baby.`name` AS babyName,
+		base_class.class_name AS className,
+		base_grade.grade_name AS gradeName
+	FROM
+		base_sign_record
+	INNER JOIN base_baby ON base_sign_record.baby_id = base_baby.id
+	INNER JOIN base_school ON base_baby.school_id = base_school.id
+	INNER JOIN base_class ON base_baby.class_id = base_class.id
+	INNER JOIN base_grade ON base_class.grade_id = base_grade.id
+	WHERE (1=1)
+	<if test="null !=babyId and babyId!=''">
+	AND baby_id = #{babyId}
+	</if>
+	<if test="null !=deleteFlag">
+	AND base_sign_record.delete_flag = #{deleteFlag}
+	</if>
+	AND (base_sign_record.sign_status = 1  
+        or base_sign_record.sign_status = 2)
+	<if test="null !=schoolId and schoolId !=''">
+	AND base_school.id = #{schoolId}
+	</if>	
+	<if test="null !=classId and classId !=''">
+	AND base_class.id = #{classId}
+	</if>
+	<if test="null!=startTime and null != endTime and startTime !='' and endTime !=''">
+	AND base_sign_record.sign_time BETWEEN #{startTime} and  #{endTime}
+	</if>
+	GROUP BY
+		signDatas
+	</select>
+</mapper>

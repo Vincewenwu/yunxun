@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseMemberMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseMember">
+		<id column="id" property="id" />
+		<result column="school_id" property="schoolId" />
+		<result column="unionid" property="unionid" />
+		<result column="openid" property="openid" />
+		<result column="sex" property="sex" />
+		<result column="name" property="name" />
+		<result column="phone_num" property="phoneNum" />
+		<result column="address" property="address" />
+		<result column="head_portrait" property="headPortrait" />
+		<result column="home_phone" property="homePhone" />
+		<result column="intro" property="intro" />
+		<result column="email" property="email" />
+		<result column="qq" property="qq" />
+		<result column="id_card_num" property="idCardNum" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="delete_flag" property="deleteFlag" />
+		<result column="birth" property="birth" />
+	</resultMap>
+
+</mapper>

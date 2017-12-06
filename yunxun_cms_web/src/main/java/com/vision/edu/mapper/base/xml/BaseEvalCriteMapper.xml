@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vision.edu.mapper.base.BaseEvalCriteMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.vision.edu.entity.base.BaseEvalCrite">
+		<id column="id" property="id" />
+		<result column="project_name" property="projectName" />
+		<result column="eval_crite" property="evalCrite" />
+		<result column="grade_id" property="gradeId" />
+		<result column="create_man" property="createMan" />
+		<result column="create_time" property="createTime" />
+		<result column="update_man" property="updateMan" />
+		<result column="update_time" property="updateTime" />
+		<result column="delete_flag" property="deleteFlag" />
+	</resultMap>
+	
+	<!-- @author WuYing 分页、根据条件查询 -->
+	<select id="findAllParentCrite"  resultType="com.vision.edu.entity.base.BaseEvalCrite">
+	SELECT
+			base_eval_crite.id,
+			base_eval_crite.project_name AS projectName,
+			base_eval_crite.eval_crite AS evalCrite,
+			base_eval_crite.grade_id AS gradeId,
+			base_eval_crite.create_man AS createMan,
+			base_eval_crite.create_time AS createTime,
+			base_eval_crite.update_man AS updateMan,
+			base_eval_crite.update_time AS updateTime,
+			base_grade.grade_name AS gradeName,
+		CASE
+		WHEN base_eval_crite.delete_flag = 0 THEN
+			'正常'
+		ELSE
+			'删除'
+		END STATUS,
+		CASE
+		WHEN base_eval_crite.team = 0 THEN
+			'上学期'
+		ELSE
+			'下学期'
+		END strteam
+		FROM
+			base_eval_crite
+		INNER JOIN base_grade ON base_grade.id=base_eval_crite.grade_id
+		WHERE base_eval_crite.delete_flag = 0
+		<if test="baseEvalCrite.gradeId != null and baseEvalCrite.gradeId != '' ">
+			AND base_eval_crite.grade_id = #{baseEvalCrite.gradeId}
+		</if>
+		<if test="baseEvalCrite.projectName !=null and baseEvalCrite.projectName!='' ">
+			AND base_eval_crite.project_name LIKE concat('%',#{baseEvalCrite.projectName},'%')
+		</if>
+		<if test="baseEvalCrite.team != null">
+			AND base_eval_crite.team = #{baseEvalCrite.team}
+		</if>
+	</select>
+	
+	<!-- 查询家长对宝贝评价项目内容 -->
+	<!-- <select id="findParentEvalContent" resultType="com.vision.edu.common.base.BaseEntity">
+	SELECT
+		base_eval_crite.id,
+		base_eval_crite.project_name AS projectName,
+		base_eval_crite.eval_crite AS evalCrite
+	FROM
+		base_eval_crite
+	WHERE
+		base_eval_crite.grade_id = #{gradeId}
+	</select> -->
+
+</mapper>
